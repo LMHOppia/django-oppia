@@ -47,16 +47,7 @@ def run(path):
             #json_obj['server'] = 'http://localhost:8000/'
             
             for user in json_obj['users']:
-                print("Processing user: " + user['username'])    
-                
-                # process trackers for type=media/quiz
-                for tracker in user['trackers']:
-                    if tracker["type"] == "" and "event" in tracker:
-                        
-                        if tracker["event"] == "media_played":
-                            tracker["type"] = "media"
-                        if tracker["event"] == "quiz_attempt":
-                            tracker["type"] = "quiz"   
+                print("Processing user: " + user['username'])      
                 
                 # process quizzes
                 for quiz_response in user['quizresponses']:
