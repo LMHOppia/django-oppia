@@ -49,6 +49,16 @@ def run(path):
             for user in json_obj['users']:
                 print("Processing user: " + user['username'])    
                 
+                # process trackers for type=media/quiz
+                for tracker in user['trackers']:
+                    if tracker["type"] == "" and "event" in tracker:
+                        
+                        if tracker["event"] == "media_played":
+                            tracker["type"] = "media"
+                        if tracker["event"] == "quiz_attempt":
+                            tracker["type"] = "quiz"   
+                
+                # process quizzes
                 for quiz_response in user['quizresponses']:
                     if quiz_response["quiz_id"] == 580:
                         quiz_response["quiz_id"]=11
