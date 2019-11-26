@@ -1,16 +1,11 @@
 # tests/av/test_course_publish.py
+import pytest
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.urls import reverse
 from django.test import TestCase
-from django.test.client import Client
-from django.contrib.auth.models import User
 
-from tests.utils import *
-
-from av.forms import UploadMediaForm
-from av.models import UploadedMedia
-
-from tests.user_logins import *
+from tests.user_logins import ADMIN_USER
 
 
 class MediaUploadResourceTest(TestCase):
@@ -25,6 +20,8 @@ class MediaUploadResourceTest(TestCase):
     def setUp(self):
         super(MediaUploadResourceTest, self).setUp()
 
+    @pytest.mark.xfail(reason="works on local, but not on Github workflow \
+        see issue: https://github.com/DigitalCampus/django-oppia/issues/689")
     def test_upload_template(self):
 
         media_file_content = open(self.media_file_path, 'rb')

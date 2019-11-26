@@ -1,6 +1,8 @@
 from django.test import TestCase
-from tests.utils import *
-from tests.user_logins import *
+from django.urls import reverse
+from tests.user_logins import ADMIN_USER, \
+                              STAFF_USER, \
+                              NORMAL_USER
 
 
 class PermissionsViewTest(TestCase):

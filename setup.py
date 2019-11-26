@@ -51,5 +51,8 @@ setup(
         "defusedxml==0.5.0",
         "Pillow==6.2.0",
         "sorl-thumbnail==12.5.0",
+        "pycodestyle",
+        "pytest",
+        "pytest-django",
     ],
 )

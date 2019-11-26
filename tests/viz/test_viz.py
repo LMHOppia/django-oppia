@@ -1,14 +1,20 @@
 import datetime
 
-from django.contrib.auth.models import User
 from django.test import TestCase
-from django.test.client import Client
+from django.urls import reverse
 from django.utils import timezone
 
-from tests.utils import *
-from tests.user_logins import *
+from tests.user_logins import ADMIN_USER, \
+                              STAFF_USER, \
+                              NORMAL_USER, \
+                              TEACHER_USER
 
-from viz.views import *
+from viz.views import summary_get_registrations, \
+                      summary_get_countries, \
+                      summary_get_languages, \
+                      summary_get_downloads, \
+                      summary_get_course_activity, \
+                      summary_get_searches
 
 
 class VisualisationsTest(TestCase):
@@ -85,7 +91,8 @@ class VisualisationsTest(TestCase):
     def test_summary_helper_reg(self):
         start_date = timezone.now() - datetime.timedelta(days=365)
 
-        user_registrations, previous_user_registrations = summary_get_registrations(start_date)
+        user_registrations, previous_user_registrations = \
+            summary_get_registrations(start_date)
         self.assertEqual(user_registrations.count(), 0)
         self.assertEqual(previous_user_registrations, 4)
 
@@ -105,14 +112,16 @@ class VisualisationsTest(TestCase):
     def test_summary_helper_downloads(self):
         start_date = timezone.now() - datetime.timedelta(days=365)
         # Course Downloads
-        course_downloads, previous_course_downloads = summary_get_downloads(start_date)
+        course_downloads, previous_course_downloads = \
+            summary_get_downloads(start_date)
         self.assertEqual(course_downloads.count(), 0)
         self.assertEqual(previous_course_downloads, 0)
 
     def test_summary_helper_activity(self):
         start_date = timezone.now() - datetime.timedelta(days=365)
         # Course Activity
-        course_activity, previous_course_activity, hot_courses = summary_get_course_activity(start_date)
+        course_activity, previous_course_activity, hot_courses = \
+            summary_get_course_activity(start_date)
         self.assertEqual(course_activity.count(), 0)
         self.assertEqual(previous_course_activity, 0)
         self.assertEqual(len(hot_courses), 0)

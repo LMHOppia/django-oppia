@@ -1,8 +1,6 @@
 # oppia/activitylog/models.py
-import datetime
 import os
 
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import post_delete
@@ -13,9 +11,12 @@ from django.utils import timezone
 
 class UploadedActivityLog(models.Model):
 
-    create_user = models.ForeignKey(User, related_name='activitylog_create_user', on_delete=models.CASCADE)
+    create_user = models.ForeignKey(User,
+                                    related_name='activitylog_create_user',
+                                    on_delete=models.CASCADE)
     created_date = models.DateTimeField('date created', default=timezone.now)
-    lastupdated_date = models.DateTimeField('date updated', default=timezone.now)
+    lastupdated_date = models.DateTimeField('date updated',
+                                            default=timezone.now)
     file = models.FileField(upload_to="activitylog/%Y/%m/", blank=False)
 
     class Meta:

@@ -1,6 +1,4 @@
 
-import oppia.management.commands
-
 from distutils.util import strtobool
 
 from django.core.management.base import BaseCommand
@@ -25,7 +23,7 @@ class Command(BaseCommand):
 
     def prompt(self, query):
         self.stdout.write('%s [y/n]: ' % query)
-        val = raw_input()
+        val = input()
         try:
             ret = strtobool(val)
         except ValueError:
@@ -76,7 +74,7 @@ class Command(BaseCommand):
                 self.style.MIGRATE_LABEL("  * " + key + ":")
                 + ' %d items to delete' % elem_count)
 
-        if total is 0:
+        if total == 0:
             self.stdout.write(
                 self.style.MIGRATE_SUCCESS("No new elements to clean up."))
         else:

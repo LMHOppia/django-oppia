@@ -1,18 +1,19 @@
 # oppia/models.py
 import datetime
 import json
-from xml.dom.minidom import *
-
 import os
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models import Max, Sum, Q
+from django.db.models import Max, Sum
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from tastypie.models import create_api_key
 
 from quiz.models import QuizAttempt, Quiz
+
+from xml.dom.minidom import Document
 
 models.signals.post_save.connect(create_api_key, sender=User)
 
@@ -190,13 +191,26 @@ class Course(models.Model):
 
     @staticmethod
     def get_media_viewed(course, user):
-        acts = Media.objects.filter(course=course).values_list('digest')
-        return Tracker.objects.filter(course=course,
-                                      user=user,
-                                      digest__in=acts) \
+        media = Media.objects.filter(course=course)
+
+        tracker_viewed = Tracker.objects.filter(
+            course=course,
+            user=user,
+            digest__in=media.values_list('digest')) \
             .values_list('digest') \
             .distinct() \
             .count()
+
+        event_viewed = 0
+        for m in media:
+            media = Tracker.objects.filter(course=course,
+                                           user=user,
+                                           data__contains=m.filename,
+                                           event='media_played')
+            if media.exists:
+                event_viewed += 1
+
+        return max(event_viewed, tracker_viewed)
 
 
 class CourseManager(models.Model):

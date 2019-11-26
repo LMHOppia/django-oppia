@@ -1,19 +1,11 @@
 
-import oppia.management.commands
-
 from distutils.util import strtobool
 
 from django.core.management.base import BaseCommand
 
 from oppia.models import Activity
 from quiz.models import Quiz, \
-                        QuizProps, \
-                        QuizAttempt, \
-                        Response, \
-                        ResponseProps, \
-                        Question, \
-                        QuestionProps, \
-                        QuizQuestion
+                        QuizAttempt
 
 
 class Command(BaseCommand):
@@ -25,7 +17,7 @@ class Command(BaseCommand):
 
     def prompt(self, query):
         self.stdout.write('%s [y/n]: ' % query)
-        val = raw_input()
+        val = input()
         try:
             ret = strtobool(val)
         except ValueError:

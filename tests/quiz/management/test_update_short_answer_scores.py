@@ -1,8 +1,4 @@
 from django.test import TestCase
-from django.test.client import Client
-from django.contrib.auth.models import User
-
-from tests.utils import *
 
 
 class UpdateShortAnswerScoresTest(TestCase):

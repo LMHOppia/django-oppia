@@ -1,19 +1,20 @@
 
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
+from django.core.exceptions import PermissionDenied
 from django.forms import formset_factory
-from django.http import JsonResponse, HttpResponseRedirect
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
-from django.urls import reverse
+from django.utils import timezone
 
-from gamification.forms import EditCoursePointsForm, \
-                               EditActivityPointsForm, \
-                               EditMediaPointsForm, \
-                               GamificationEventForm
-from gamification.models import *
+from gamification.forms import GamificationEventForm
+from gamification.models import DefaultGamificationEvent, \
+                                CourseGamificationEvent, \
+                                ActivityGamificationEvent, \
+                                MediaGamificationEvent
 from gamification.xml_writer import GamificationXMLWriter
-from oppia.models import Points, Section, Activity
-from oppia.permissions import *
+from oppia.models import Course, Points, Activity, Media
+from oppia.permissions import can_edit_course
 
 
 @staff_member_required
@@ -119,7 +120,7 @@ def save_media_points(request, form, course, media):
 
 def edit_course_gamification(request, course_id):
     if not can_edit_course(request, course_id):
-        raise exceptions.PermissionDenied
+        raise PermissionDenied
 
     course = get_object_or_404(Course, pk=course_id)
 
@@ -193,13 +194,13 @@ def edit_course_gamification(request, course_id):
 
     default_points = {
         'course': DefaultGamificationEvent.objects
-                    .exclude(level=DefaultGamificationEvent.GLOBAL),
+        .exclude(level=DefaultGamificationEvent.GLOBAL),
         'activity': DefaultGamificationEvent.objects
-                    .filter(level=DefaultGamificationEvent.ACTIVITY),
+        .filter(level=DefaultGamificationEvent.ACTIVITY),
         'quiz': DefaultGamificationEvent.objects
-                    .filter(level=DefaultGamificationEvent.QUIZ),
+        .filter(level=DefaultGamificationEvent.QUIZ),
         'media': DefaultGamificationEvent.objects
-                    .filter(level=DefaultGamificationEvent.MEDIA)
+        .filter(level=DefaultGamificationEvent.MEDIA)
     }
 
     course_events = CourseGamificationEvent.objects.filter(course=course)

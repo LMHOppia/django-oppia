@@ -6,7 +6,7 @@ from django.urls import reverse
 
 from oppia.models import Tracker
 from quiz.models import QuizAttemptResponse, QuizAttempt
-from tests.user_logins import *
+from tests.user_logins import ADMIN_USER
 
 
 class UploadActivityLogTest(TestCase):

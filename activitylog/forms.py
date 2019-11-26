@@ -1,8 +1,7 @@
 # oppia/activitylog/forms.py
 
-from crispy_forms.bootstrap import FieldWithButtons
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Submit, Div, Row, Field
+from crispy_forms.layout import Layout, Submit, Div
 
 from django import forms
 from django.conf import settings
@@ -16,8 +15,9 @@ class UploadActivityLogForm(forms.Form):
                             .join(settings.OPPIA_UPLOAD_TRACKER_FILE_TYPES)),
                 required=True,
                 label=_(u'Activity Log'),
-                error_messages={'required':
-                                _(u'Please select an activity log file to upload')},
+                error_messages={
+                    'required':
+                    _(u'Please select an activity log file to upload')},
                 )
 
     def __init__(self, *args, **kwargs):
@@ -44,4 +44,5 @@ class UploadActivityLogForm(forms.Form):
                 not in settings.OPPIA_UPLOAD_TRACKER_FILE_TYPES:
             raise forms.ValidationError(
                 _(u"You may only upload an activity log file which is one of \
-                  the following types: %s" % ', '.join(settings.OPPIA_UPLOAD_TRACKER_FILE_TYPES)))
+                  the following types: %s"
+                  % ', '.join(settings.OPPIA_UPLOAD_TRACKER_FILE_TYPES)))

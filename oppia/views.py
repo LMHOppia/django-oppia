@@ -6,17 +6,19 @@ import os
 
 import tablib
 from dateutil.relativedelta import relativedelta
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.db.models import Count, Sum
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from helpers.forms.dates import DateRangeIntervalForm, \
-                                DateRangeForm, \
-                                DateDiffForm
+                                DateRangeForm
 from oppia.forms.cohort import CohortForm
 from oppia.forms.upload import UploadCourseStep1Form, UploadCourseStep2Form
 from oppia.models import Activity, Points
@@ -24,8 +26,19 @@ from oppia.models import Tracker, \
                         Tag, \
                         CourseTag, \
                         CourseCohort, \
-                        CoursePublishingLog
-from oppia.permissions import *
+                        CoursePublishingLog, \
+                        Participant, \
+                        Course, \
+                        Cohort
+from oppia.permissions import can_edit_course, \
+                              can_view_course_detail, \
+                              check_owner, \
+                              get_cohorts, \
+                              user_can_upload, \
+                              can_view_courses_list, \
+                              can_add_cohort, \
+                              can_view_cohort, \
+                              can_edit_cohort
 from profile.models import UserProfile
 from profile.views import get_paginated_users
 from quiz.models import Quiz, QuizAttempt, QuizAttemptResponse
@@ -144,9 +157,11 @@ def teacher_home_view(request):
     # get student activity
     activity = []
     no_days = (end_date - start_date).days + 1
-    students = User.objects.filter(participant__role=Participant.STUDENT,
-                                   participant__cohort__in=cohorts).distinct()
-    courses = Course.objects.filter(coursecohort__cohort__in=cohorts).distinct()
+    students = User.objects \
+        .filter(participant__role=Participant.STUDENT,
+                participant__cohort__in=cohorts).distinct()
+    courses = Course.objects \
+        .filter(coursecohort__cohort__in=cohorts).distinct()
     trackers = Tracker.objects.filter(course__in=courses,
                                       user__in=students,
                                       tracker_date__gte=start_date,
@@ -155,7 +170,9 @@ def teacher_home_view(request):
         .values('activity_date').annotate(count=Count('id'))
     for i in range(0, no_days, +1):
         temp = start_date + datetime.timedelta(days=i)
-        count = next((dct['count'] for dct in trackers if dct['activity_date'] == temp.date()), 0)
+        count = next((dct['count']
+                      for dct in trackers
+                      if dct['activity_date'] == temp.date()), 0)
         activity.append([temp.strftime("%d %b %Y"), count])
 
     return render(request, 'oppia/home-teacher.html',
@@ -239,7 +256,8 @@ def course_download_view(request, course_id):
                             content_type='application/zip')
     binary_file.close()
     response['Content-Length'] = os.path.getsize(file_to_download)
-    response['Content-Disposition'] = 'attachment; filename="%s"' % (course.filename)
+    response['Content-Disposition'] = 'attachment; filename="%s"' \
+        % (course.filename)
     return response
 
 
@@ -287,7 +305,7 @@ def upload_step1(request):
 def upload_step2(request, course_id, editing=False):
 
     if (editing and not can_edit_course(request, course_id)):
-        raise exceptions.PermissionDenied
+        raise PermissionDenied
 
     course = Course.objects.get(pk=course_id)
 
@@ -297,17 +315,19 @@ def upload_step2(request, course_id, editing=False):
             # add the tags
             add_course_tags(form, course, request.user)
             redirect = 'oppia_course' if editing else 'oppia_upload_success'
-            CoursePublishingLog(course=course,
-                                new_version=course.version,
-                                user=request.user,
-                                action="upload_course_published",
-                                data=_(u'Course published via file upload')).save()
+            CoursePublishingLog(
+                course=course,
+                new_version=course.version,
+                user=request.user,
+                action="upload_course_published",
+                data=_(u'Course published via file upload')).save()
             return HttpResponseRedirect(reverse(redirect))
     else:
         form = UploadCourseStep2Form(initial={'tags': course.get_tags(),
                                               'is_draft': course.is_draft, })
 
-    page_title = _(u'Upload Course - step 2') if not editing else _(u'Edit course')
+    page_title = _(u'Upload Course - step 2') \
+        if not editing else _(u'Edit course')
     return render(request, 'course/form.html',
                   {'form': form,
                    'course_title': course.title,
@@ -535,8 +555,9 @@ def export_tracker_detail(request, course_id):
                          t.agent,
                          ""))
 
-    response = HttpResponse(data.xls,
-                            content_type='application/vnd.ms-excel;charset=utf-8')
+    response = HttpResponse(
+        data.xls,
+        content_type='application/vnd.ms-excel;charset=utf-8')
     response['Content-Disposition'] = "attachment; filename=export.xls"
 
     return response
@@ -544,7 +565,7 @@ def export_tracker_detail(request, course_id):
 
 def cohort_list_view(request):
     if not request.user.is_staff:
-        raise exceptions.PermissionDenied
+        raise PermissionDenied
 
     cohorts = Cohort.objects.all()
     return render(request, 'cohort/list.html', {'cohorts': cohorts, })
@@ -569,7 +590,7 @@ def get_paginated_courses(request):
 
 def cohort_add(request):
     if not can_add_cohort(request):
-        raise exceptions.PermissionDenied
+        raise PermissionDenied
 
     if request.method == 'POST':
         form = CohortForm(request.POST.copy())
@@ -705,7 +726,7 @@ def cohort_leaderboard_view(request, cohort_id):
 
 def cohort_edit(request, cohort_id):
     if not can_edit_cohort(request, cohort_id):
-        raise exceptions.PermissionDenied
+        raise PermissionDenied
     cohort = Cohort.objects.get(pk=cohort_id)
     teachers_selected = []
     students_selected = []
@@ -994,9 +1015,7 @@ def app_launch_activity_redirect_view(request):
     try:
         digest = str(request.GET.get('digest'))
     except ValueError:
-        return HttpResponse(content=template.render(context),
-                            content_type='text/html; charset=utf-8',
-                            status=404)
+        return Http404()
 
     # get activity and redirect
     activity = get_object_or_404(Activity, digest=digest)

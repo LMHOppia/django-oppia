@@ -4,6 +4,8 @@ Management command to get user locations based on their IP address in the
 Tracker model
 """
 
+import json
+import time
 import urllib
 
 from django.core.management.base import BaseCommand
@@ -32,10 +34,10 @@ class Command(BaseCommand):
                 cached.save()
                 self.stdout.write("hits updated")
             except UserLocationVisualization.DoesNotExist:
-                update_via_freegeoip(t)
+                update_via_freegeoip(self, t)
 
 
-def update_via_freegeoip(t):
+def update_via_freegeoip(self, t):
     url = 'https://freegeoip.net/json/%s' % (t['ip'])
     self.stdout.write(t['ip'] + " : " + url)
     try:

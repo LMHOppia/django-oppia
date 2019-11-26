@@ -1,9 +1,5 @@
 import os
 import time
-import sys
-import argparse
-import hashlib
-import subprocess
 
 from django.conf import settings
 from django.core.management import call_command
@@ -32,7 +28,8 @@ class Command(BaseCommand):
             hours = 0
 
         # check if cron already running
-        prop, created = SettingProperties.objects.get_or_create(key='oppia_cron_lock', int_value=1)
+        prop, created = SettingProperties.objects \
+            .get_or_create(key='oppia_cron_lock', int_value=1)
         if not created:
             self.stdout.write("Oppia cron is already running")
             return
@@ -49,7 +46,9 @@ class Command(BaseCommand):
                     if os.path.isfile(f):
                         os.remove(f)
         else:
-            self.stdout.write('{path} does not exist. Don\'t need to clean it'.format(path=path))
+            self.stdout \
+                .write('{path} does not exist. Don\'t need to clean it'
+                       .format(path=path))
 
         from oppia.awards import courses_completed
         courses_completed(int(hours))

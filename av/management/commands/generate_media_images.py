@@ -39,8 +39,9 @@ class Command(BaseCommand):
                 self.stdout.write("  > Created output dir " + cache_dir)
 
             self.stdout.write("  > Generating miniatures... \r", )
-            image_generator_command = ("%s %s" % (settings.SCREENSHOT_GENERATOR_PROGRAM,
-                                                  settings.SCREENSHOT_GENERATOR_PROGRAM_PARAMS)) \
+            image_generator_command = (
+                "%s %s" % (settings.SCREENSHOT_GENERATOR_PROGRAM,
+                           settings.SCREENSHOT_GENERATOR_PROGRAM_PARAMS)) \
                 % (m.file.path,
                    content.SCREENSHOT_IMAGE_WIDTH,
                    content.SCREENSHOT_IMAGE_HEIGHT,
@@ -76,7 +77,7 @@ class Command(BaseCommand):
         current_frame = 0
         for line in iter(ffmpeg.stdout.readline, ''):
             if "frame=" in line:
-                if line.split(" ")[3] is "":
+                if line.split(" ")[3] == "":
                     frame = int(line.split(" ")[4])
                 else:
                     frame = int(line.split(" ")[3])

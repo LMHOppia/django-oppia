@@ -1,4 +1,5 @@
 # coding: utf-8
+import pytest
 
 # QuizAttemptResource
 from django.contrib.auth.models import User
@@ -80,6 +81,8 @@ class QuizAttemptResourceTest(ResourceTestCaseMixin, TestCase):
         self.assertTrue('points' in response_data)
         self.assertTrue('badges' in response_data)
 
+    @pytest.mark.xfail(reason="see issue: \
+        https://github.com/DigitalCampus/django-oppia/issues/667")
     def test_quiz_attempt_points_included(self):
 
         data = {

@@ -19,7 +19,7 @@ from gamification.models import CourseGamificationEvent, \
                                 MediaGamificationEvent
 from gamification.xml_writer import GamificationXMLWriter
 from oppia.models import Course, Section, Activity, Media, CoursePublishingLog
-from oppia.utils.courseFile import unescape_xml
+from oppia.utils.course_file import unescape_xml
 from quiz.models import Quiz, \
                         Question, \
                         QuizQuestion, \
@@ -396,8 +396,9 @@ def parse_and_save_activity(req,
                             data=msg_text).save()
     else:
         msg_text = _(u'Activity "%(act)s"(%(digest)s) previously existed. \
-                    Updated with new information') % {'act': activity.title,
-                                                      'digest': activity.digest}
+                    Updated with new information') \
+                    % {'act': activity.title,
+                       'digest': activity.digest}
         '''
         If we also want to show the activities that previously existed,
         uncomment this next line
@@ -574,7 +575,8 @@ def clean_old_course(req, user, oldsections, old_course_filename, course):
                                 data=msg_text).save()
         sec.delete()
 
-    if old_course_filename is not None and old_course_filename != course.filename:
+    if old_course_filename is not None \
+            and old_course_filename != course.filename:
         try:
             os.remove(os.path.join(settings.COURSE_UPLOAD_DIR,
                                    old_course_filename))
@@ -585,7 +587,7 @@ def clean_old_course(req, user, oldsections, old_course_filename, course):
 # helper functions
 def create_quiz_props(quiz, quiz_obj):
     for prop in quiz_obj['props']:
-        if prop is not 'id':
+        if prop != 'id':
             QuizProps(
                 quiz=quiz, name=prop,
                 value=quiz_obj['props'][prop]
@@ -609,7 +611,7 @@ def create_quiz_questions(user, quiz, quiz_obj):
         q['question']['id'] = question.pk
 
         for prop in q['question']['props']:
-            if prop is not 'id':
+            if prop != 'id':
                 QuestionProps(
                     question=question, name=prop,
                     value=q['question']['props'][prop]
@@ -627,7 +629,7 @@ def create_quiz_questions(user, quiz, quiz_obj):
             r['id'] = response.pk
 
             for prop in r['props']:
-                if prop is not 'id':
+                if prop != 'id':
                     ResponseProps(
                         response=response, name=prop,
                         value=r['props'][prop]
