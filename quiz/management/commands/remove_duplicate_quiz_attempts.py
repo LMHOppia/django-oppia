@@ -23,24 +23,40 @@ class Command(BaseCommand):
         Remove quizattempts with no UUID
         """
         result = QuizAttempt.objects.filter(instance_id=None).delete()
-        self.stdout.write(_(u"\n\n%d quiz attempts removed that had no instance_id\n" % result[0]))
+        self.stdout.write(
+            _(u"\n\n%d quiz attempts removed that had no instance_id\n"
+              % result[0]))
 
         """
         Remove proper duplicate quizattempts - using max id
         """
-        quiz_attempts = QuizAttempt.objects.all().values('instance_id').annotate(dcount=Count('instance_id')).filter(dcount__gte=2)
+        quiz_attempts = QuizAttempt.objects.all() \
+            .values('instance_id') \
+            .annotate(dcount=Count('instance_id')) \
+            .filter(dcount__gte=2)
 
         for index, quiz_attempt in enumerate(quiz_attempts):
             self.stdout.write("%d/%d" % (index, quiz_attempts.count()))
-            exclude = QuizAttempt.objects.filter(instance_id=quiz_attempt['instance_id']).aggregate(max_id=Max('id'))
-            deleted = QuizAttempt.objects.filter(instance_id=quiz_attempt['instance_id']).exclude(id=exclude['max_id']).delete()
-            self.stdout.write(_(u"%d duplicate quiz attempt(s) removed for instance_id %s based on max id" % (deleted[0], quiz_attempt['instance_id'])))
-            
+            exclude = QuizAttempt.objects \
+                .filter(instance_id=quiz_attempt['instance_id']) \
+                .aggregate(max_id=Max('id'))
+            deleted = QuizAttempt.objects \
+                .filter(instance_id=quiz_attempt['instance_id']) \
+                .exclude(id=exclude['max_id']) \
+                .delete()
+            self.stdout.write(_(u"%d duplicate quiz attempt(s) removed for \
+                               instance_id %s based on max id"
+                                % (deleted[0],
+                                   quiz_attempt['instance_id'])))
+
         """
         Remember to run summary cron from start
         """
         if result[0] + quiz_attempts.count() > 0:
-            self.stdout.write(_(u"Since duplicates have been found and removed, you should now run `update_summaries` to ensure the dashboard graphs are accurate."))
-            accept = raw_input(_(u"Would you like to run `update_summaries` now? [Yes/No]"))
+            self.stdout.write(_(u"Since duplicates have been found and \
+                               removed, you should now run `update_summaries` \
+                               to ensure the dashboard graphs are accurate."))
+            accept = input(_(u"Would you like to run `update_summaries` \
+                                 now? [Yes/No]"))
             if accept == 'y':
                 call_command('update_summaries', fromstart=True)

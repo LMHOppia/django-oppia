@@ -7,15 +7,18 @@ from django.utils.translation import ugettext as _
 
 
 class LoginForm(forms.Form):
-    username = forms.CharField(max_length=30,
-                               error_messages={'required': _(u'Please enter a username.')}, )
-    password = forms.CharField(widget=forms.PasswordInput,
-                               error_messages={'required': _(u'Please enter a password.'), },
-                               required=True)
+    username = forms.CharField(
+        max_length=30,
+        error_messages={'required':
+                        _(u'Please enter a username.')})
+    password = forms.CharField(
+        widget=forms.PasswordInput,
+        error_messages={'required': _(u'Please enter a password.')},
+        required=True)
     next = forms.CharField(widget=forms.HiddenInput())
 
     def __init__(self, *args, **kwargs):
-        super(LoginForm, self).__init__( * args, ** kwargs)
+        super(LoginForm, self).__init__(* args, ** kwargs)
         self.helper = FormHelper()
         self.helper.form_action = reverse('profile_login')
         self.helper.form_class = 'form-horizontal'
@@ -40,5 +43,6 @@ class LoginForm(forms.Form):
 
         user = authenticate(username=username, password=password)
         if user is None or not user.is_active:
-            raise forms.ValidationError(_(u"Invalid username or password. Please try again."))
+            raise forms.ValidationError(
+                _(u"Invalid username or password. Please try again."))
         return cleaned_data

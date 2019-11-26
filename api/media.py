@@ -29,8 +29,8 @@ def upload_view(request):
             validation_errors.append("field '{0}' missing".format(field))
 
     if len(validation_errors) > 0:
-        return JsonResponse({'errors': validation_errors}, status=400 )
-    
+        return JsonResponse({'errors': validation_errors}, status=400)
+
     # authenticate user
     username = request.POST.get("username")
     password = request.POST.get("password")
@@ -48,7 +48,8 @@ def upload_view(request):
 
     if result['result'] == UploadedMedia.UPLOAD_STATUS_SUCCESS:
         media = result['media']
-        embed_code = media.get_embed_code(request.build_absolute_uri(media.file.url))
+        embed_code = media.get_embed_code(
+            request.build_absolute_uri(media.file.url))
 
         return JsonResponse({'embed_code': embed_code}, status=201)
     else:

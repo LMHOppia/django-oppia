@@ -15,20 +15,32 @@ from tastypie.resources import ModelResource
 import oppia
 from api.serializers import PrettyJSONSerializer
 from oppia.models import Points, Award
-from quiz.api.serializers import QuizJSONSerializer, QuizAttemptJSONSerializer
+from quiz.api.serializers import QuizJSONSerializer, \
+                                 QuizAttemptJSONSerializer
 from quiz.api.validation import QuizOwnerValidation, QuestionOwnerValidation
 from quiz.api.validation import ResponseOwnerValidation
 from quiz.models import Quiz, Question, QuizQuestion, Response, QuestionProps
-from quiz.models import QuizProps, ResponseProps, QuizAttempt, QuizAttemptResponse
+from quiz.models import QuizProps, \
+                        ResponseProps, \
+                        QuizAttempt, \
+                        QuizAttemptResponse
 
 
 class QuizResource(ModelResource):
-    questions = fields.ToManyField('quiz.api.resources.QuizQuestionResource', 'quizquestion_set', related_name='quiz', full=True)
-    props = fields.ToManyField('quiz.api.resources.QuizPropsResource', 'quizprops_set', related_name='quiz', full=True)
+    questions = fields.ToManyField('quiz.api.resources.QuizQuestionResource',
+                                   'quizquestion_set',
+                                   related_name='quiz',
+                                   full=True)
+    props = fields.ToManyField('quiz.api.resources.QuizPropsResource',
+                               'quizprops_set',
+                               related_name='quiz',
+                               full=True)
     owner = fields.ForeignKey(UserResource, 'owner')
 
     class Meta:
-        queryset = Quiz.objects.filter(draft=0, deleted=0).order_by('-lastupdated_date')
+        queryset = Quiz.objects.filter(draft=0,
+                                       deleted=0) \
+                               .order_by('-lastupdated_date')
         allowed_methods = ['get', 'post']
         fields = ['title', 'id', 'description', 'lastupdated_date']
         resource_name = 'quiz'
@@ -44,7 +56,9 @@ class QuizResource(ModelResource):
 
     def prepend_urls(self):
         return [
-            url(r"^(?P<resource_name>%s)/search/$" % self._meta.resource_name, self.wrap_view('get_search'), name="api_get_search"),
+            url(r"^(?P<resource_name>%s)/search/$" % self._meta.resource_name,
+                self.wrap_view('get_search'),
+                name="api_get_search"),
         ]
 
     def get_search(self, request, **kwargs):
@@ -54,7 +68,11 @@ class QuizResource(ModelResource):
 
         # Do the query.
         query = request.GET.get('q', '')
-        searchresults = self._meta.queryset.filter(draft=0, deleted=0).filter(Q(title__icontains=query) | Q(description__icontains=query))
+        searchresults = self._meta.queryset \
+            .filter(draft=0,
+                    deleted=0) \
+            .filter(Q(title__icontains=query)
+                    | Q(description__icontains=query))
         paginator = Paginator(searchresults, 20)
 
         try:
@@ -76,9 +94,11 @@ class QuizResource(ModelResource):
         self.log_throttled_access(request)
         return self.create_response(request, object_list)
 
-        
+
 class QuizQuestionResource(ModelResource):
-    question = fields.ToOneField('quiz.api.resources.QuestionResource', 'question', full=True)
+    question = fields.ToOneField('quiz.api.resources.QuestionResource',
+                                 'question',
+                                 full=True)
 
     class Meta:
         queryset = QuizQuestion.objects.all()
@@ -91,13 +111,21 @@ class QuizQuestionResource(ModelResource):
         always_return_data = True
 
     def hydrate(self, bundle, request=None):
-        bundle.obj.quiz_id = QuizResource().get_via_uri(bundle.data['quiz']).id
+        bundle.obj.quiz_id = QuizResource() \
+            .get_via_uri(bundle.data['quiz']).id
         return bundle
 
 
 class QuestionResource(ModelResource):
-    responses = fields.ToManyField('quiz.api.resources.ResponseResource', 'response_set', related_name='question', full=True)
-    props = fields.ToManyField('quiz.api.resources.QuestionPropsResource', 'questionprops_set', related_name='question', full=True, null=True)
+    responses = fields.ToManyField('quiz.api.resources.ResponseResource',
+                                   'response_set',
+                                   related_name='question',
+                                   full=True)
+    props = fields.ToManyField('quiz.api.resources.QuestionPropsResource',
+                               'questionprops_set',
+                               related_name='question',
+                               full=True,
+                               null=True)
     owner = fields.ForeignKey(UserResource, 'owner')
 
     class Meta:
@@ -116,7 +144,9 @@ class QuestionResource(ModelResource):
 
 
 class QuestionPropsResource(ModelResource):
-    question = fields.ToOneField('quiz.api.resources.QuestionResource', 'question', related_name='questionprops')
+    question = fields.ToOneField('quiz.api.resources.QuestionResource',
+                                 'question',
+                                 related_name='questionprops')
 
     class Meta:
         queryset = QuestionProps.objects.all()
@@ -128,10 +158,14 @@ class QuestionPropsResource(ModelResource):
         validation = QuestionOwnerValidation()
         always_return_data = True
 
-    
+
 class ResponseResource(ModelResource):
     question = fields.ForeignKey(QuestionResource, 'question')
-    props = fields.ToManyField('quiz.api.resources.ResponsePropsResource', 'responseprops_set', related_name='response', full=True, null=True)
+    props = fields.ToManyField('quiz.api.resources.ResponsePropsResource',
+                               'responseprops_set',
+                               related_name='response',
+                               full=True,
+                               null=True)
 
     class Meta:
         queryset = Response.objects.all()
@@ -151,7 +185,9 @@ class ResponseResource(ModelResource):
 
 
 class ResponsePropsResource(ModelResource):
-    response = fields.ToOneField('quiz.api.resources.ResponseResource', 'response', related_name='responseprops')
+    response = fields.ToOneField('quiz.api.resources.ResponseResource',
+                                 'response',
+                                 related_name='responseprops')
 
     class Meta:
         queryset = ResponseProps.objects.all()
@@ -164,7 +200,7 @@ class ResponsePropsResource(ModelResource):
         validation = ResponseOwnerValidation()
         always_return_data = True
 
-           
+
 class QuizPropsResource(ModelResource):
     quiz = fields.ForeignKey(QuizResource, 'quiz')
 
@@ -189,14 +225,18 @@ class QuizPropsResource(ModelResource):
 
     # add the quiz_id into the bundle
     def dehydrate(self, bundle, request=None):
-        bundle.data['quiz_id'] = QuizResource().get_via_uri(bundle.data['quiz']).id
+        bundle.data['quiz_id'] = QuizResource() \
+            .get_via_uri(bundle.data['quiz']).id
         return bundle
-    # use this for filtering on the digest prop of a quiz to determine if it already exists
-    # to avoid recreating the same quiz over and over
+    # use this for filtering on the digest prop of a quiz to determine if it
+    # already exists to avoid recreating the same quiz over and over
 
     def prepend_urls(self):
         return [
-            url(r"^(?P<resource_name>%s)/digest/(?P<digest>[\w\d_.-]+)/$" % self._meta.resource_name, self.wrap_view('digest_detail'), name="api_digest_detail"),
+            url(r"^(?P<resource_name>%s)/digest/(?P<digest>[\w\d_.-]+)/$"
+                % self._meta.resource_name,
+                self.wrap_view('digest_detail'),
+                name="api_digest_detail"),
         ]
 
     def digest_detail(self, request, **kwargs):
@@ -205,7 +245,10 @@ class QuizPropsResource(ModelResource):
         self.throttle_check(request)
 
         digest = kwargs.pop('digest', None)
-        quizprop = self._meta.queryset.filter(name='digest', quiz__deleted=0, quiz__draft=0).filter(value=digest)
+        quizprop = self._meta.queryset.filter(name='digest',
+                                              quiz__deleted=0,
+                                              quiz__draft=0) \
+            .filter(value=digest)
         paginator = Paginator(quizprop, 20)
 
         try:
@@ -230,7 +273,9 @@ class QuizPropsResource(ModelResource):
 
 class QuizAttemptResponseResource(ModelResource):
     question = fields.ForeignKey(QuestionResource, 'question')
-    quizattempt = fields.ToOneField('quiz.api.resources.QuizAttemptResource', 'quizattempt', related_name='quizattemptresponse')
+    quizattempt = fields.ToOneField('quiz.api.resources.QuizAttemptResource',
+                                    'quizattempt',
+                                    related_name='quizattemptresponse')
 
     class Meta:
         queryset = QuizAttemptResponse.objects.all()
@@ -244,7 +289,12 @@ class QuizAttemptResponseResource(ModelResource):
 class QuizAttemptResource(ModelResource):
     quiz = fields.ForeignKey(QuizResource, 'quiz')
     user = fields.ForeignKey(UserResource, 'user')
-    responses = fields.ToManyField('quiz.api.resources.QuizAttemptResponseResource', 'quizattemptresponse_set', related_name='quizattempt', full=True, null=True)
+    responses = fields \
+        .ToManyField('quiz.api.resources.QuizAttemptResponseResource',
+                     'quizattemptresponse_set',
+                     related_name='quizattempt',
+                     full=True,
+                     null=True)
     points = fields.IntegerField(readonly=True)
     badges = fields.IntegerField(readonly=True)
 
@@ -259,8 +309,10 @@ class QuizAttemptResource(ModelResource):
 
     def hydrate(self, bundle, request=None):
         bundle.obj.user = User.objects.get(pk=bundle.request.user.id)
-        bundle.obj.ip = bundle.request.META.get('REMOTE_ADDR', oppia.DEFAULT_IP_ADDRESS)
-        bundle.obj.agent = bundle.request.META.get('HTTP_USER_AGENT', 'unknown')
+        bundle.obj.ip = bundle.request.META.get('REMOTE_ADDR',
+                                                oppia.DEFAULT_IP_ADDRESS)
+        bundle.obj.agent = bundle.request.META.get('HTTP_USER_AGENT',
+                                                   'unknown')
 
         # check the quiz exists
         try:
@@ -269,23 +321,27 @@ class QuizAttemptResource(ModelResource):
             raise BadRequest(_(u'Quiz does not exist'))
 
         # see if instance id already submitted
-        attempts = QuizAttempt.objects.filter(instance_id=bundle.data['instance_id']).count()
+        attempts = QuizAttempt.objects.filter(
+            instance_id=bundle.data['instance_id']).count()
 
         if attempts > 0:
             raise BadRequest(_(u'QuizAttempt already submitted'))
 
-        #check that all the questions exist and are part of this quiz
+        # check that all the questions exist and are part of this quiz
         for response in bundle.data['responses']:
             if 'question_id' in response:
                 try:
-                    response['question'] = Question.objects.get(pk=response['question_id'])
+                    response['question'] = Question.objects.get(
+                        pk=response['question_id'])
                 except Question.DoesNotExist:
                     raise BadRequest(_(u'Question does not exist'))
-                #check part of this quiz
+                # check part of this quiz
                 try:
-                    QuizQuestion.objects.get(quiz=bundle.obj.quiz, question=response['question'])
+                    QuizQuestion.objects.get(quiz=bundle.obj.quiz,
+                                             question=response['question'])
                 except QuizQuestion.DoesNotExist:
-                    raise BadRequest(_(u'This question is not part of this quiz'))
+                    raise BadRequest(
+                        _(u'This question is not part of this quiz'))
 
         if 'points' in bundle.data:
             bundle.obj.points = bundle.data['points']

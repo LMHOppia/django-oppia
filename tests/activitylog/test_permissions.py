@@ -1,11 +1,14 @@
 from django.test import TestCase
-from tests.utils import *
-from tests.user_logins import *
+from django.urls import reverse
+from tests.user_logins import ADMIN_USER, \
+                              STAFF_USER, \
+                              NORMAL_USER
+
 
 class PermissionsViewTest(TestCase):
-    fixtures = ['tests/test_user.json', 
-                'tests/test_oppia.json', 
-                'tests/test_quiz.json', 
+    fixtures = ['tests/test_user.json',
+                'tests/test_oppia.json',
+                'tests/test_quiz.json',
                 'tests/test_permissions.json']
 
     def setUp(self):
@@ -39,7 +42,7 @@ class PermissionsViewTest(TestCase):
         self.assertRedirects(res, login_url)
         return res
 
-    ############ upload activity log file #############
+    # upload activity log file
     def test_anon_cantview_av_upload(self):
         self.assert_must_login('oppia_activitylog_upload')
 

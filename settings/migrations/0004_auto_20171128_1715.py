@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import migrations, models
+from django.db import migrations
 
 
 class Migration(migrations.Migration):
@@ -13,6 +13,8 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='settingproperties',
-            options={'ordering': ['key'], 'verbose_name': 'Settings', 'verbose_name_plural': 'Settings'},
+            options={'ordering': ['key'],
+                     'verbose_name': 'Settings',
+                     'verbose_name_plural': 'Settings'},
         ),
     ]

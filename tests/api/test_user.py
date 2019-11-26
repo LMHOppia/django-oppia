@@ -7,7 +7,7 @@ from tests.utils import get_api_key
 
 
 class UserResourceTest(ResourceTestCaseMixin, TestCase):
-    fixtures = ['tests/test_user.json', 
+    fixtures = ['tests/test_user.json',
                 'tests/test_oppia.json']
 
     def setUp(self):
@@ -18,7 +18,8 @@ class UserResourceTest(ResourceTestCaseMixin, TestCase):
 
     # check get not allowed
     def test_get_invalid(self):
-        self.assertHttpMethodNotAllowed(self.api_client.get(self.url, format='json'))
+        self.assertHttpMethodNotAllowed(self.api_client.get(self.url,
+                                                            format='json'))
 
     # check valid login
     def test_valid_login(self):

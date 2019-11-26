@@ -1,14 +1,15 @@
-from django.conf import settings
 from django.conf.urls import url, include
 from tastypie.api import Api
 
 from activitylog.views import post_activitylog
 from api.media import upload_view
 from api.publish import publish_view
-from api.resources import TrackerResource, CourseResource, TagResource, PointsResource, AwardsResource, BadgesResource, \
+from api.resources import TrackerResource, CourseResource, TagResource, \
+    PointsResource, AwardsResource, BadgesResource, \
     UserResource, RegisterResource, ResetPasswordResource
 
-from quiz.api.resources import QuizResource, QuizPropsResource, QuestionResource, QuizQuestionResource, \
+from quiz.api.resources import QuizResource, QuizPropsResource, \
+    QuestionResource, QuizQuestionResource, \
     ResponseResource, QuizAttemptResource
 
 
@@ -30,11 +31,6 @@ def get_api(version_name):
     api.register(QuizQuestionResource())
     api.register(ResponseResource())
     api.register(QuizAttemptResource())
-
-
-    if settings.DEVICE_ADMIN_ENABLED:
-        from deviceadmin.api.resources import UserDeviceResource
-        api.register(UserDeviceResource())
 
     return api
 
