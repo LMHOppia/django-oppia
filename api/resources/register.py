@@ -88,7 +88,7 @@ class RegisterResource(ModelResource):
         required = ['username',
                     'password',
                     'passwordagain',
-                    'email',
+                    #'email', LMH_custom_start
                     'firstname',
                     'lastname']
         check_required_params(bundle, required)
@@ -96,8 +96,7 @@ class RegisterResource(ModelResource):
         data = {'username': bundle.data['username'],
                 'password': bundle.data['password'],
                 'password_again': bundle.data['passwordagain'],
-                'email': bundle.data['email']
-                if 'email' in bundle.data else '',
+                'email': bundle.data['email'] if 'email' in bundle.data else bundle.data['username'] + "@lastmilehealth.org",
                 'first_name': bundle.data['firstname'],
                 'last_name': bundle.data['lastname'], }
 
@@ -119,12 +118,17 @@ class RegisterResource(ModelResource):
             username = bundle.data['username']
             password = bundle.data['password']
             # LMH_custom_start
-            email = bundle.data['email'] if 'email' in bundle.data else '',
+            email = bundle.data['email'] if 'email' in bundle.data else (bundle.data['username'] + "@lastmilehealth.org"),
             # LMH_custom_end
             first_name = bundle.data['firstname']
             last_name = bundle.data['lastname']
 
         try:
+            try:
+                # @TODO for some reason the email gets returned as a tuple...
+                email = email[0]
+            except IndexError:
+                pass
             bundle.obj = User.objects.create_user(username, email, password)
             bundle.obj.first_name = first_name
             bundle.obj.last_name = last_name
