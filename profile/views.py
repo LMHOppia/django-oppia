@@ -36,13 +36,14 @@ from profile.forms import LoginForm, \
                           UploadProfileForm, \
                           UserSearchForm, \
                           DeleteAccountForm
-from profile.models import UserProfile
+from profile.models import UserProfile, CustomField, UserProfileCustomField
 from quiz.models import Quiz, QuizAttempt, QuizAttemptResponse
 from reports.signals import dashboard_accessed
 from settings import constants
 from settings.models import SettingProperties
 from summary.models import UserCourseSummary
 
+STR_COMMON_FORM = 'common/form/form.html'
 
 def filter_redirect(request_content):
     redirection = request_content.get('next')
@@ -93,11 +94,52 @@ def login_view(request):
     else:
         form = LoginForm(initial={'next': filter_redirect(request.GET), })
 
-    return render(request, 'common/form/form.html',
+    return render(request, STR_COMMON_FORM,
                   {'username': username,
                    'form': form,
                    'title': _(u'Login')})
 
+def register_form_process(form):
+     # Create new user
+    username = form.cleaned_data.get("username")
+    email = form.cleaned_data.get("email")
+    password = form.cleaned_data.get("password")
+    first_name = form.cleaned_data.get("first_name")
+    last_name = form.cleaned_data.get("last_name")
+    user = User.objects.create_user(username, email, password)
+    user.first_name = first_name
+    user.last_name = last_name
+    user.save()
+
+    # create UserProfile record
+    user_profile = UserProfile()
+    user_profile.user = user
+    user_profile.job_title = form.cleaned_data.get("job_title")
+    user_profile.organisation = form.cleaned_data.get("organisation")
+    user_profile.save()
+
+    # save any custom fields
+    custom_fields = CustomField.objects.all()
+    for custom_field in custom_fields:
+        if custom_field.type == 'int':
+            profile_field = UserProfileCustomField(
+                key_name=custom_field,
+                user=user,
+                value_int=form.cleaned_data.get(custom_field.id))
+        elif custom_field.type == 'bool':
+            profile_field = UserProfileCustomField(
+                key_name=custom_field,
+                user=user,
+                value_bool=form.cleaned_data.get(custom_field.id))
+        else:
+            profile_field = UserProfileCustomField(
+                key_name=custom_field,
+                user=user,
+                value_str=form.cleaned_data.get(custom_field.id))
+        if (form.cleaned_data.get(custom_field.id) is not None
+                and form.cleaned_data.get(custom_field.id) != '') \
+                or custom_field.required is True:
+            profile_field.save()
 
 def register(request):
     self_register = SettingProperties \
@@ -111,19 +153,9 @@ def register(request):
         if form.is_valid():  # All validation rules pass
             # Create new user
             username = form.cleaned_data.get("username")
-            email = form.cleaned_data.get("email")
             password = form.cleaned_data.get("password")
-            first_name = form.cleaned_data.get("first_name")
-            last_name = form.cleaned_data.get("last_name")
-            user = User.objects.create_user(username, email, password)
-            user.first_name = first_name
-            user.last_name = last_name
-            user.save()
-            user_profile = UserProfile()
-            user_profile.user = user
-            user_profile.job_title = form.cleaned_data.get("job_title")
-            user_profile.organisation = form.cleaned_data.get("organisation")
-            user_profile.save()
+            register_form_process(form)
+            
             u = authenticate(username=username, password=password)
             if u is not None and u.is_active:
                 login(request, u)
@@ -132,7 +164,7 @@ def register(request):
     else:
         form = RegisterForm(initial={'next': filter_redirect(request.GET), })
 
-    return render(request, 'common/form/form.html',
+    return render(request, STR_COMMON_FORM,
                   {'form': form,
                    'title': _(u'Register')})
 
@@ -168,10 +200,66 @@ def reset(request):
     else:
         form = ResetForm()  # An unbound form
 
-    return render(request, 'common/form/form.html',
+    return render(request, STR_COMMON_FORM,
                   {'form': form,
                    'title': _(u'Reset password')})
 
+def edit_form_initial(view_user, key):
+    user_profile, created = UserProfile.objects \
+            .get_or_create(user=view_user)
+
+    initial = {'username': view_user.username,
+               'email': view_user.email,
+               'first_name': view_user.first_name,
+               'last_name': view_user.last_name,
+               'api_key': key.key,
+               'job_title': user_profile.job_title,
+               'organisation': user_profile.organisation}
+    custom_fields = CustomField.objects.all()
+    for custom_field in custom_fields:
+        upcf_row = UserProfileCustomField.objects \
+            .filter(key_name=custom_field, user=view_user)
+        if upcf_row.count == 1:
+            initial[custom_field.id] = upcf_row.first().get_value()
+
+    return initial
+                    
+def edit_form_process(form, view_user):
+    email = form.cleaned_data.get("email")
+    first_name = form.cleaned_data.get("first_name")
+    last_name = form.cleaned_data.get("last_name")
+    view_user.email = email
+    view_user.first_name = first_name
+    view_user.last_name = last_name
+    view_user.save()
+
+    user_profile, created = UserProfile.objects \
+        .get_or_create(user=view_user)
+    user_profile.job_title = form.cleaned_data.get("job_title")
+    user_profile.organisation = form.cleaned_data.get("organisation")
+    user_profile.save()
+
+    # save any custom fields
+    custom_fields = CustomField.objects.all()
+    for custom_field in custom_fields:
+        if (form.cleaned_data.get(custom_field.id) is not None
+                and form.cleaned_data.get(custom_field.id) != '') \
+                or custom_field.required is True:
+
+            profile_field, created = UserProfileCustomField.objects \
+                .get_or_create(key_name=custom_field, user=view_user)
+
+            if custom_field.type == 'int':
+                profile_field.value_int = \
+                    form.cleaned_data.get(custom_field.id)
+            elif custom_field.type == 'bool':
+                profile_field.value_bool = \
+                    form.cleaned_data.get(custom_field.id)
+            else:
+                profile_field.value_str = \
+                    form.cleaned_data.get(custom_field.id)
+            
+            profile_field.save()
 
 def edit(request, user_id=0):
 
@@ -187,19 +275,7 @@ def edit(request, user_id=0):
         form = ProfileForm(request.POST)
         if form.is_valid():
             # update basic data
-            email = form.cleaned_data.get("email")
-            first_name = form.cleaned_data.get("first_name")
-            last_name = form.cleaned_data.get("last_name")
-            view_user.email = email
-            view_user.first_name = first_name
-            view_user.last_name = last_name
-            view_user.save()
-
-            user_profile, created = UserProfile.objects \
-                .get_or_create(user=view_user)
-            user_profile.job_title = form.cleaned_data.get("job_title")
-            user_profile.organisation = form.cleaned_data.get("organisation")
-            user_profile.save()
+            edit_form_process(form, view_user)
 
             messages.success(request, _(u"Profile updated"))
 
@@ -210,17 +286,8 @@ def edit(request, user_id=0):
                 view_user.save()
                 messages.success(request, _(u"Password updated"))
     else:
-        user_profile, created = UserProfile.objects \
-            .get_or_create(user=view_user)
-
-        form = ProfileForm(initial={'username': view_user.username,
-                                    'email': view_user.email,
-                                    'first_name': view_user.first_name,
-                                    'last_name': view_user.last_name,
-                                    'api_key': key.key,
-                                    'job_title': user_profile.job_title,
-                                    'organisation':
-                                        user_profile.organisation})
+        initial = edit_form_initial(view_user, key)
+        form = ProfileForm(initial=initial)
 
     return render(request, 'profile/profile.html', {'form': form})
 
@@ -354,6 +421,70 @@ def user_activity(request, user_id):
                    'activity_graph_data': activity})
 
 
+def user_course_quiz_activity(view_user,
+                              activity_quiz,
+                              quizzes_passed,
+                              quizzes_attempted):
+    course_pretest = None
+    try:
+        quizobjs = Quiz.objects.filter(quizprops__value=activity_quiz.digest,
+                                       quizprops__name="digest")
+        if quizobjs.count() > 0:
+            quiz = quizobjs[0]
+    except Quiz.DoesNotExist:
+        quiz = None
+
+    no_attempts = quiz.get_no_attempts_by_user(quiz, view_user)
+    attempts = QuizAttempt.objects.filter(quiz=quiz, user=view_user)
+
+    passed = False
+    if no_attempts > 0:
+
+        quiz_maxscore = float(attempts[0].maxscore)
+        attemps_stats = attempts.aggregate(max=Max('score'),
+                                           min=Min('score'),
+                                           avg=Avg('score'))
+        max_score = 100 * float(attemps_stats['max']) / quiz_maxscore
+        min_score = 100 * float(attemps_stats['min']) / quiz_maxscore
+        avg_score = 100 * float(attemps_stats['avg']) / quiz_maxscore
+        first_date = attempts \
+            .aggregate(date=Min('attempt_date'))['date']
+        recent_date = attempts \
+            .aggregate(date=Max('attempt_date'))['date']
+        first_score = 100 * float(attempts
+                                  .filter(attempt_date=first_date)[0]
+                                  .score) / quiz_maxscore
+        latest_score = 100 * float(attempts
+                                   .filter(attempt_date=recent_date)[0]
+                                   .score) / quiz_maxscore
+
+        passed = max_score is not None and max_score > 75
+        if activity_quiz.section.order == 0:
+            course_pretest = first_score
+        else:
+            quizzes_attempted += 1
+            quizzes_passed = (quizzes_passed + 1) \
+                if passed else quizzes_passed
+
+    else:
+        max_score = None
+        min_score = None
+        avg_score = None
+        first_score = None
+        latest_score = None
+
+    quiz = {'quiz': activity_quiz,
+            'quiz_order': activity_quiz.order,
+            'no_attempts': no_attempts,
+            'max_score': max_score,
+            'min_score': min_score,
+            'first_score': first_score,
+            'latest_score': latest_score,
+            'avg_score': avg_score,
+            'passed': passed
+            }
+    return quiz, course_pretest, quizzes_passed, quizzes_attempted
+
 def user_course_activity_view(request, user_id, course_id):
 
     view_user, response = get_user(request, user_id)
@@ -369,70 +500,15 @@ def user_course_activity_view(request, user_id, course_id):
 
     quizzes_attempted = 0
     quizzes_passed = 0
-    course_pretest = None
 
     quizzes = []
-    for aq in act_quizzes:
-        try:
-            quizobjs = Quiz.objects.filter(quizprops__value=aq.digest,
-                                           quizprops__name="digest")
-            if quizobjs.count() <= 0:
-                continue
-            else:
-                quiz = quizobjs[0]
-        except Quiz.DoesNotExist:
-            quiz = None
-
-        no_attempts = quiz.get_no_attempts_by_user(quiz, view_user)
-        attempts = QuizAttempt.objects.filter(quiz=quiz, user=view_user)
-
-        passed = False
-        if no_attempts > 0:
-
-            quiz_maxscore = float(attempts[0].maxscore)
-            attemps_stats = attempts.aggregate(max=Max('score'),
-                                               min=Min('score'),
-                                               avg=Avg('score'))
-            max_score = 100 * float(attemps_stats['max']) / quiz_maxscore
-            min_score = 100 * float(attemps_stats['min']) / quiz_maxscore
-            avg_score = 100 * float(attemps_stats['avg']) / quiz_maxscore
-            first_date = attempts \
-                .aggregate(date=Min('attempt_date'))['date']
-            recent_date = attempts \
-                .aggregate(date=Max('attempt_date'))['date']
-            first_score = 100 * float(attempts
-                                      .filter(attempt_date=first_date)[0]
-                                      .score) / quiz_maxscore
-            latest_score = 100 * float(attempts
-                                       .filter(attempt_date=recent_date)[0]
-                                       .score) / quiz_maxscore
-
-            passed = max_score is not None and max_score > 75
-            if aq.section.order == 0:
-                course_pretest = first_score
-            else:
-                quizzes_attempted += 1
-                quizzes_passed = (quizzes_passed + 1) \
-                    if passed else quizzes_passed
-
-        else:
-            max_score = None
-            min_score = None
-            avg_score = None
-            first_score = None
-            latest_score = None
-
-        quiz = {'quiz': aq,
-                'quiz_order': aq.order,
-                'no_attempts': no_attempts,
-                'max_score': max_score,
-                'min_score': min_score,
-                'first_score': first_score,
-                'latest_score': latest_score,
-                'avg_score': avg_score,
-                'passed': passed
-                }
-        quizzes.append(quiz)
+    for activity_quiz in act_quizzes:
+        quiz, course_pretest, quizzes_passed, quizzes_attempted = \
+            user_course_quiz_activity(view_user,
+                                      activity_quiz,
+                                      quizzes_passed,
+                                      quizzes_attempted)
+        quizzes.append(quiz)        
 
     activities_completed = course.get_activities_completed(course, view_user)
     activities_total = course.get_no_activities()
@@ -477,7 +553,71 @@ def user_course_activity_view(request, user_id, course_id):
                    'page_ordering': ('-' if inverse_order else '') + ordering,
                    'activity_graph_data': activity})
 
+def process_upload_user_file(csv_file, required_fields):
+    results = []
+    try:
+        for row in csv_file:
+            # check all required fields defined
+            all_defined = True
+            for rf in required_fields:
+                if rf not in row or row[rf].strip() == '':
+                    result = {}
+                    result['username'] = row['username']
+                    result['created'] = False
+                    result['message'] = _(u'No %s set' % rf)
+                    results.append(result)
+                    all_defined = False
 
+            if not all_defined:
+                continue
+            
+            results.append(process_upload_file_save_user(row))
+                
+    except Exception:
+        result = {}
+        result['username'] = None
+        result['created'] = False
+        result['message'] = _(u'Could not parse file')
+        results.append(result)
+
+    return results
+
+def process_upload_file_save_user(row):
+    user = User()
+    user.username = row['username']
+    user.first_name = row['firstname']
+    user.last_name = row['lastname']
+    user.email = row['email']
+    auto_password = False
+    if 'password' in row:
+        user.set_password(row['password'])
+    else:
+        password = User.objects.make_random_password()
+        user.set_password(password)
+        auto_password = True
+    try:
+        user.save()
+        up = UserProfile()
+        up.user = user
+        for col_name in row:
+            setattr(up, col_name, row[col_name])
+        up.save()
+        result = {}
+        result['username'] = row['username']
+        result['created'] = True
+        if auto_password:
+            result['message'] = \
+                _(u'User created with password: %s' % password)
+        else:
+            result['message'] = _(u'User created')
+    except IntegrityError:
+        result = {}
+        result['username'] = row['username']
+        result['created'] = False
+        result['message'] = _(u'User already exists')
+    
+    return result    
+    
 def upload_view(request):
     if not request.user.is_superuser:
         raise PermissionDenied
@@ -485,68 +625,10 @@ def upload_view(request):
     if request.method == 'POST':  # if form submitted...
         form = UploadProfileForm(request.POST, request.FILES)
         if form.is_valid():
-            request.FILES['upload_file'].open("rb")
-            csv_file = csv.DictReader(request.FILES['upload_file'].file)
+            csv_file = csv.DictReader(
+                chunk.decode() for chunk in request.FILES['upload_file'])
             required_fields = ['username', 'firstname', 'lastname', 'email']
-            results = []
-            try:
-                for row in csv_file:
-                    # check all required fields defined
-                    all_defined = True
-                    for rf in required_fields:
-                        if rf not in row or row[rf].strip() == '':
-                            result = {}
-                            result['username'] = row['username']
-                            result['created'] = False
-                            result['message'] = _(u'No %s set' % rf)
-                            results.append(result)
-                            all_defined = False
-
-                    if not all_defined:
-                        continue
-
-                    user = User()
-                    user.username = row['username']
-                    user.first_name = row['firstname']
-                    user.last_name = row['lastname']
-                    user.email = row['email']
-                    auto_password = False
-                    if 'password' in row:
-                        user.set_password(row['password'])
-                    else:
-                        password = User.objects.make_random_password()
-                        user.set_password(password)
-                        auto_password = True
-                    try:
-                        user.save()
-                        up = UserProfile()
-                        up.user = user
-                        for col_name in row:
-                            setattr(up, col_name, row[col_name])
-                        up.save()
-                        result = {}
-                        result['username'] = row['username']
-                        result['created'] = True
-                        if auto_password:
-                            result['message'] = \
-                                _(u'User created with password: %s' % password)
-                        else:
-                            result['message'] = _(u'User created')
-                        results.append(result)
-                    except IntegrityError as ie:
-                        result = {}
-                        result['username'] = row['username']
-                        result['created'] = False
-                        result['message'] = _(u'User already exists')
-                        results.append(result)
-                        continue
-            except:
-                result = {}
-                result['username'] = None
-                result['created'] = False
-                result['message'] = _(u'Could not parse file')
-                results.append(result)
-
+            results = process_upload_user_file(csv_file, required_fields)
     else:
         results = []
         form = UploadProfileForm()
