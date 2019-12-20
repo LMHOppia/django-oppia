@@ -1,23 +1,16 @@
-from django.test import TestCase
+from oppia.test import OppiaTestCase
 from django.urls import reverse
-from tests.user_logins import ADMIN_USER, \
-                              STAFF_USER, \
-                              NORMAL_USER
 
 
-class PermissionsViewTest(TestCase):
-    fixtures = ['tests/test_user.json',
-                'tests/test_oppia.json',
-                'tests/test_quiz.json',
-                'tests/test_permissions.json']
+class PermissionsViewTest(OppiaTestCase):
 
     def setUp(self):
         super(PermissionsViewTest, self).setUp()
         self.login_url = reverse('profile_login')
-
+        
     def get_view(self, route, user=None):
         if user is not None:
-            self.client.login(username=user['user'], password=user['password'])
+            self.client.force_login(user)
         return self.client.get(route)
 
     def assert_response(self, view, status_code, user=None, view_kwargs=None):
@@ -47,10 +40,13 @@ class PermissionsViewTest(TestCase):
         self.assert_must_login('oppia_activitylog_upload')
 
     def test_admin_canview_av_upload(self):
-        self.assert_can_view('oppia_activitylog_upload', ADMIN_USER)
+        self.assert_can_view('oppia_activitylog_upload', self.admin_user)
 
     def test_staff_canview_av_upload(self):
-        self.assert_can_view('oppia_activitylog_upload', STAFF_USER)
+        self.assert_can_view('oppia_activitylog_upload', self.staff_user)
+
+    def test_teacher_cantview_av_upload(self):
+        self.assert_can_view('oppia_activitylog_upload', self.teacher_user)
 
     def test_student_cantview_av_upload(self):
-        self.assert_unauthorized('oppia_activitylog_upload', NORMAL_USER)
+        self.assert_unauthorized('oppia_activitylog_upload', self.normal_user)

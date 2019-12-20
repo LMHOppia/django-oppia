@@ -1,13 +1,11 @@
 import pytest
+import unittest
 
 from django.conf import settings
-from django.test import TestCase
+from oppia.test import OppiaTestCase
 
 
-class ImplementationCoreTest(TestCase):
-
-    def setUp(self):
-        super(ImplementationCoreTest, self).setUp()
+class ImplementationCoreTest(OppiaTestCase):
 
     def test_settings(self):
         self.assertEqual(settings.OPPIA_ALLOW_SELF_REGISTRATION, True)
@@ -15,6 +13,7 @@ class ImplementationCoreTest(TestCase):
         self.assertEqual(settings.OPPIA_STAFF_ONLY_UPLOAD, True)
 
     @pytest.mark.xfail(reason="This is for core Oppia not this LMH implementation")
+    @unittest.expectedFailure
     def test_theme(self):
         with open("./static/css/oppia.scss", 'r') as oppia_scss:
             css_file = oppia_scss.read().replace("\n", "")

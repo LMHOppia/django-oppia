@@ -1,19 +1,12 @@
 import pytest
 
-from django.test import TestCase
+from oppia.test import OppiaTestCase
 
 from settings.models import SettingProperties
 from summary.cron import update_summaries
 
 
-class SummaryCronTest(TestCase):
-    fixtures = ['tests/test_user.json',
-                'tests/test_oppia.json',
-                'tests/test_quiz.json',
-                'tests/test_permissions.json',
-                'default_gamification_events.json',
-                'tests/test_tracker.json',
-                'default_badges.json']
+class SummaryCronTest(OppiaTestCase):
 
     @pytest.mark.xfail(reason="works on local, but not on Github workflow \
         see issue: https://github.com/DigitalCampus/django-oppia/issues/691")
@@ -31,6 +24,7 @@ class SummaryCronTest(TestCase):
 
         # check unlocked again
         lock = SettingProperties.get_int('oppia_summary_cron_lock', 999)
+        self.assertEqual(lock, 999)
 
     def test_summary_cron_locked(self):
         # set lock not
