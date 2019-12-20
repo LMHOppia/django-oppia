@@ -2,13 +2,10 @@ import pytest
 import unittest
 
 from django.conf import settings
-from django.test import TestCase
+from oppia.test import OppiaTestCase
 
 
-class ImplementationCoreTest(TestCase):
-
-    def setUp(self):
-        super(ImplementationCoreTest, self).setUp()
+class ImplementationCoreTest(OppiaTestCase):
 
     def test_settings(self):
         self.assertEqual(settings.OPPIA_ALLOW_SELF_REGISTRATION, True)
