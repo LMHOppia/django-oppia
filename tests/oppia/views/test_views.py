@@ -23,7 +23,7 @@ class OppiaViewsTest(OppiaTestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_login(self):
-        response = self.client.post(reverse('profile_login'),
+        response = self.client.post(self.login_url,
                                     {'username': 'demo2',
                                      'password': 'secret'})
         self.assertEqual(response.status_code, 200)
@@ -51,7 +51,6 @@ class OppiaViewsTest(OppiaTestCase):
     # recent_activity_detail
     # export_tracker_detail
     # cohort_add
-    # cohort_leaderboard_view
     # leaderboard_view
     # course_quiz
     # course_quiz_attempts

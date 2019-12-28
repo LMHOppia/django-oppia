@@ -9,19 +9,19 @@ from quiz.models import QuizAttemptResponse, QuizAttempt
 
 class UploadActivityLogTest(OppiaTestCase):
 
-    def setUp(self):
-        super(UploadActivityLogTest, self).setUp()
-        self.url = reverse('oppia_activitylog_upload')
-        self.basic_activity_log = \
-            './oppia/fixtures/activity_logs/basic_activity.json'
-        self.activity_log_file_path = \
+    fixtures = ['tests/test_user.json',
+                'tests/test_oppia.json',
+                'tests/test_malaria_quiz.json',
+                'tests/test_permissions.json',
+                'default_gamification_events.json']
+
+    url = reverse('oppia_activitylog_upload')
+    basic_activity_log = './oppia/fixtures/activity_logs/basic_activity.json'
+    activity_log_file_path = \
             './oppia/fixtures/activity_logs/activity_upload_test.json'
-        self.wrong_activity_file = \
-            './oppia/fixtures/activity_logs/wrong_format.json'
-        self.new_user_activity = \
-            './oppia/fixtures/activity_logs/new_user_activity.json'
-        self.quiz_attempt_log = \
-            './oppia/fixtures/activity_logs/quiz_attempts.json'
+    wrong_activity_file = './oppia/fixtures/activity_logs/wrong_format.json'
+    new_user_activity = './oppia/fixtures/activity_logs/new_user_activity.json'
+    quiz_attempt_log = './oppia/fixtures/activity_logs/quiz_attempts.json'
 
     def test_no_file(self):
         # no file
