@@ -231,9 +231,6 @@ class Section(models.Model):
         verbose_name = _('Section')
         verbose_name_plural = _('Sections')
 
-    def __unicode__(self):
-        return self.get_title()
-
     def __str__(self):
         return self.get_title()
 
@@ -275,9 +272,6 @@ class Activity(models.Model):
     image = models.TextField(blank=True, null=True, default=None)
     content = models.TextField(blank=True, null=True, default=None)
     description = models.TextField(blank=True, null=True, default=None)
-
-    def __unicode__(self):
-        return self.get_title()
 
     def __str__(self):
         return self.get_title()
@@ -405,9 +399,6 @@ class Media(models.Model):
         verbose_name = _('Media')
         verbose_name_plural = _('Media')
 
-    def __unicode__(self):
-        return self.filename
-
     def __str__(self):
         return self.filename
 
@@ -486,9 +477,6 @@ class Tracker(models.Model):
     class Meta:
         verbose_name = _('Tracker')
         verbose_name_plural = _('Trackers')
-
-    def __unicode__(self):
-        return self.agent
 
     def __str__(self):
         return self.agent
@@ -624,24 +612,6 @@ class Tracker(models.Model):
         if course:
             results = results.filter(course=course)
         return results.count()
-
-    @staticmethod
-    def activity_secs(user,
-                      type,
-                      start_date=None,
-                      end_date=None,
-                      course=None):
-        results = Tracker.objects.filter(user=user, type=type)
-        if start_date:
-            results = results.filter(submitted_date__gte=start_date)
-        if end_date:
-            results = results.filter(submitted_date__lte=end_date)
-        if course:
-            results = results.filter(course=course)
-        time = results.aggregate(total=Sum('time_taken'))
-        if time['total'] is None:
-            return 0
-        return time['total']
 
     def get_lang(self):
         try:

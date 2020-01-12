@@ -39,13 +39,7 @@ def home_view(request):
     leaderboard = None
 
     if request.user.is_authenticated:
-        # create profile if none exists (historical for very old users)
-        try:
-            up = request.user.userprofile
-        except UserProfile.DoesNotExist:
-            up = UserProfile()
-            up.user = request.user
-            up.save()
+        up = request.user.userprofile
 
         dashboard_accessed.send(sender=None, request=request, data=None)
 
@@ -122,9 +116,7 @@ def home_view(request):
 
 
 def teacher_home_view(request):
-    cohorts, response = get_cohorts(request)
-    if response is not None:
-        return response
+    cohorts = get_cohorts(request)
 
     start_date = timezone.now() - datetime.timedelta(days=31)
     end_date = timezone.now()
