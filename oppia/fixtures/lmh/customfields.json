@@ -1,0 +1,28 @@
+[
+{
+    "model": "profile.customfield",
+    "pk": "county",
+    "fields": {
+        "label": "County",
+        "required": false,
+        "order": 0,
+        "helper_text": "",
+        "type": "str",
+        "created": "2020-01-12T10:07:33.758Z",
+        "modified": "2020-01-12T10:07:33.758Z"
+    }
+},
+{
+    "model": "profile.customfield",
+    "pk": "district",
+    "fields": {
+        "label": "District",
+        "required": false,
+        "order": 0,
+        "helper_text": "",
+        "type": "str",
+        "created": "2020-01-12T10:07:51.707Z",
+        "modified": "2020-01-12T10:07:51.707Z"
+    }
+}
+]
