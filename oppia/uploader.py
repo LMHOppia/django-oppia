@@ -32,6 +32,17 @@ from quiz.models import Quiz, \
 logger = logging.getLogger(__name__)
 
 
+def clean_lang_dict(elem_content):
+    if isinstance(elem_content, dict):
+        for lang in elem_content:
+            elem_content[lang] = elem_content[lang].strip().replace(u"\u00A0", " ")
+            return json.dumps(elem_content)
+    elif isinstance(elem_content, str):
+        return elem_content.strip().replace(u"\u00A0", " ")
+    else:
+        #If it was a boolean or a number (for some response types), return the value as is
+        return elem_content
+
 def handle_uploaded_file(f, extract_path, request, user):
     zipfilepath = os.path.join(settings.COURSE_UPLOAD_DIR, f.name)
 
@@ -42,17 +53,19 @@ def handle_uploaded_file(f, extract_path, request, user):
     try:
         zip_file = ZipFile(zipfilepath)
         zip_file.extractall(path=extract_path)
-    except BadZipfile:
+    except (OSError, BadZipfile):
         msg_text = _(u"Invalid zip file")
         messages.error(request, msg_text, extra_tags="danger")
         CoursePublishingLog(user=user,
                             action="invalid_zip",
                             data=msg_text).save()
+        shutil.rmtree(extract_path, ignore_errors=True)
         return False, 500
 
     mod_name = ''
-    for dir in os.listdir(extract_path)[:1]:
-        mod_name = dir
+    for x in os.listdir(extract_path):
+        if os.path.isdir(os.path.join(extract_path, x)):
+            mod_name = x
 
     # check there is at least a sub dir
     if mod_name == '':
@@ -61,6 +74,7 @@ def handle_uploaded_file(f, extract_path, request, user):
         CoursePublishingLog(user=user,
                             action="invalid_zip",
                             data=msg_text).save()
+        shutil.rmtree(extract_path, ignore_errors=True)
         return False, 400
 
     response = 200
@@ -155,6 +169,10 @@ def process_course(extract_path, f, mod_name, request, user):
     course.filename = f.name
     course.save()
 
+    if not parse_course_contents(request, doc, course, user, new_course):
+        return False, 500
+    clean_old_course(request, user, oldsections, old_course_filename, course)
+
     # save gamification events
     if 'gamification' in meta_info:
         events = parse_gamification_events(meta_info['gamification'])
@@ -175,9 +193,6 @@ def process_course(extract_path, f, mod_name, request, user):
                                     user=user,
                                     action="gamification_added",
                                     data=msg_text).save()
-
-    parse_course_contents(request, doc, course, user, new_course)
-    clean_old_course(request, user, oldsections, old_course_filename, course)
 
     tmp_path = replace_zip_contents(xml_path, doc, mod_name, extract_path)
     # Extract the final file into the courses area for preview
@@ -296,18 +311,18 @@ def parse_course_contents(request, xml_doc, course, user, new_course):
         course.delete()
         msg_text = \
             _(u"There don't appear to be any activities in this upload file.")
-        messages.info(request, msg_text)
-        CoursePublishingLog(course=course,
-                            user=user,
+        messages.info(request, msg_text, extra_tags="danger")
+        CoursePublishingLog(user=user,
                             action="no_activities",
                             data=msg_text).save()
-        return
+        return False
 
     process_course_sections(request, structure, course, user, new_course)
 
     media_element = xml_doc.find('media')
     if media_element is not None:
         process_course_media(request, media_element, course, user)
+    return True
 
 
 def parse_baseline_activities(request, xml_doc, course, user, new_course):
@@ -509,8 +524,8 @@ def create_quiz(req, user, quiz_obj, act_xml, activity=None):
 
     quiz = Quiz()
     quiz.owner = user
-    quiz.title = quiz_obj['title']
-    quiz.description = quiz_obj['description']
+    quiz.title = clean_lang_dict(quiz_obj['title'])
+    quiz.description = clean_lang_dict(quiz_obj['description'])
     quiz.save()
 
     quiz_obj['id'] = quiz.pk
@@ -621,7 +636,9 @@ def create_quiz_questions(user, quiz, quiz_obj):
 
         question = Question(owner=user,
                             type=q['question']['type'],
-                            title=q['question']['title'])
+                            title=clean_lang_dict(q['question']['title']))
+
+
         question.save()
 
         quiz_question = QuizQuestion(quiz=quiz,
@@ -643,7 +660,7 @@ def create_quiz_questions(user, quiz, quiz_obj):
             response = Response(
                 owner=user,
                 question=question,
-                title=r['title'],
+                title=clean_lang_dict(r['title']),
                 score=r['score'],
                 order=r['order']
             )

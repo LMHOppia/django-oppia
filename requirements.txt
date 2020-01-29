@@ -1,4 +1,4 @@
-django==2.2.8
+django==2.2.9
 django-tastypie==0.14.2
 django-tablib==3.2
 django-crispy-forms==1.7.2
@@ -14,3 +14,4 @@ pycodestyle
 pytest
 pytest-django
 django-ses
+openpyxl==3.0.3

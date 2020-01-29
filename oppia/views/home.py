@@ -17,7 +17,6 @@ from oppia.models import Tracker, \
     Participant, \
     Course
 from oppia.permissions import get_cohorts
-from profile.models import UserProfile
 from reports.signals import dashboard_accessed
 from summary.models import CourseDailyStats
 
@@ -167,10 +166,8 @@ def leaderboard_view(request):
 
 
 def app_launch_activity_redirect_view(request):
-    try:
-        digest = str(request.GET.get('digest'))
-    except ValueError:
-        return Http404()
+
+    digest = request.GET.get('digest', None)
 
     # get activity and redirect
     activity = get_object_or_404(Activity, digest=digest)
