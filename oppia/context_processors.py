@@ -1,7 +1,9 @@
 # oppia/context_processors.py
-from django.conf import settings
-
+import datetime
 import oppia
+
+from dateutil.relativedelta import relativedelta
+from django.conf import settings
 from oppia.models import Points, Award
 from reports.views import menu_reports
 from settings import constants
@@ -28,16 +30,57 @@ def get_version(request):
 
 
 def get_settings(request):
-    self_register = SettingProperties.get_int(
+    self_register = SettingProperties.get_bool(
                                 constants.OPPIA_ALLOW_SELF_REGISTRATION,
                                 settings.OPPIA_ALLOW_SELF_REGISTRATION)
+
+    show_gravatars = SettingProperties.get_bool(
+                                constants.OPPIA_SHOW_GRAVATARS,
+                                settings.OPPIA_SHOW_GRAVATARS)
+
+    ga_enabled = SettingProperties.get_bool(
+                                constants.OPPIA_GOOGLE_ANALYTICS_ENABLED,
+                                settings.OPPIA_GOOGLE_ANALYTICS_ENABLED)
+
+    ga_code = SettingProperties.get_string(
+                                constants.OPPIA_GOOGLE_ANALYTICS_CODE,
+                                settings.OPPIA_GOOGLE_ANALYTICS_CODE)
+
+    ga_domain = SettingProperties.get_string(
+                                constants.OPPIA_GOOGLE_ANALYTICS_DOMAIN,
+                                settings.OPPIA_GOOGLE_ANALYTICS_DOMAIN)
+
+    map_viz_enabled = SettingProperties.get_bool(
+                                constants.OPPIA_MAP_VISUALISATION_ENABLED,
+                                False)
+
+    cron_warning = False
+    last_cron = SettingProperties.get_string(
+        constants.OPPIA_CRON_LAST_RUN, None)
+    last_summary_cron = SettingProperties.get_string(
+        constants.OPPIA_SUMMARY_CRON_LAST_RUN, None)
+
+    if last_cron is None or last_summary_cron is None:
+        cron_warning = True
+    else:
+        start_date = datetime.datetime.now() - datetime.timedelta(days=7)
+        last_cron_date = datetime.datetime.strptime(last_cron,
+                                           constants.CRON_DATETIME_FORMAT)
+        if last_cron_date < start_date:
+            cron_warning = True
+
+        last_summary_cron_date = datetime.datetime.strptime(last_summary_cron,
+                                           constants.CRON_DATETIME_FORMAT)
+        if last_summary_cron_date < start_date:
+            cron_warning = True
+
     return {
         'OPPIA_ALLOW_SELF_REGISTRATION': self_register,
-        'OPPIA_GOOGLE_ANALYTICS_ENABLED':
-            settings.OPPIA_GOOGLE_ANALYTICS_ENABLED,
-        'OPPIA_GOOGLE_ANALYTICS_CODE': settings.OPPIA_GOOGLE_ANALYTICS_CODE,
-        'OPPIA_GOOGLE_ANALYTICS_DOMAIN':
-            settings.OPPIA_GOOGLE_ANALYTICS_DOMAIN,
-        'OPPIA_SHOW_GRAVATARS': settings.OPPIA_SHOW_GRAVATARS,
+        'OPPIA_GOOGLE_ANALYTICS_ENABLED': ga_enabled,
+        'OPPIA_GOOGLE_ANALYTICS_CODE': ga_code,
+        'OPPIA_GOOGLE_ANALYTICS_DOMAIN': ga_domain,
+        'OPPIA_SHOW_GRAVATARS': show_gravatars,
         'OPPIA_REPORTS': menu_reports(request),
-        'DEBUG': settings.DEBUG, }
+        'DEBUG': settings.DEBUG,
+        'CRON_WARNING': cron_warning,
+        'OPPIA_MAP_VISUALISATION_ENABLED': map_viz_enabled }

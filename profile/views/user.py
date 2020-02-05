@@ -98,7 +98,7 @@ def register_form_process(form):
 
 def register(request):
     self_register = SettingProperties \
-        .get_int(constants.OPPIA_ALLOW_SELF_REGISTRATION,
+        .get_bool(constants.OPPIA_ALLOW_SELF_REGISTRATION,
                  settings.OPPIA_ALLOW_SELF_REGISTRATION)
     if not self_register:
         raise Http404
@@ -174,7 +174,7 @@ def edit_form_initial(view_user, key):
     for custom_field in custom_fields:
         upcf_row = UserProfileCustomField.objects \
             .filter(key_name=custom_field, user=view_user)
-        if upcf_row.count == 1:
+        if upcf_row.exists():
             initial[custom_field.id] = upcf_row.first().get_value()
 
     return initial

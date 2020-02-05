@@ -82,7 +82,7 @@ class RegisterResource(ModelResource):
         
     def obj_create(self, bundle, **kwargs):
         self_register = SettingProperties \
-            .get_int(constants.OPPIA_ALLOW_SELF_REGISTRATION,
+            .get_bool(constants.OPPIA_ALLOW_SELF_REGISTRATION,
                      settings.OPPIA_ALLOW_SELF_REGISTRATION)
         if not self_register:
             raise BadRequest(_(u'Registration is disabled on this server.'))
@@ -175,10 +175,14 @@ class RegisterResource(ModelResource):
         return badges
 
     def dehydrate_scoring(self, bundle):
-        return settings.OPPIA_POINTS_ENABLED
+        return SettingProperties.get_bool(
+            constants.OPPIA_POINTS_ENABLED,
+            settings.OPPIA_POINTS_ENABLED)
 
     def dehydrate_badging(self, bundle):
-        return settings.OPPIA_BADGES_ENABLED
+        return SettingProperties.get_bool(
+            constants.OPPIA_BADGES_ENABLED,
+            settings.OPPIA_BADGES_ENABLED)
 
     def dehydrate_metadata(self, bundle):
         return settings.OPPIA_METADATA
