@@ -6,7 +6,7 @@
     <button class="navbar-toggler always-show" type="button" data-toggle="navdrawer" data-target="#doc-navdrawer" aria-controls="doc-navdrawer" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <a class="navbar-brand text-light" href="{% url 'oppia_home' %}"><img class="mr-2" src="{% static "oppia/images/dc_logo.png" %}" height="30" alt="{% trans 'app_name' %} {% trans 'logo' %}"/>{% trans 'app_name' %}</a>
+      <a class="navbar-brand text-light" href="{% url 'oppia:index' %}"><img class="mr-2" src="{% static "oppia/images/dc_logo.png" %}" height="30" alt="{% trans 'app_name' %} {% trans 'logo' %}"/>{% trans 'app_name' %}</a>
 
 
       <div class="collapse navbar-collapse" id="navbar-collapse">
@@ -21,11 +21,11 @@
                         <small class="text-muted">{{user.email}}</small>
                     </div>
 
-                <a class="dropdown-item" href="{% url 'profile_edit' %}"><em class="material-icons mr-2">mode_edit</em> {% trans 'Edit Profile' %}</a>
-                <a class="dropdown-item" href="{% url 'profile_points' %}"><em class="material-icons mr-2">star</em> {% trans 'Points' %}</a>
-                <a class="dropdown-item" href="{% url 'profile_badges' %}"><em class="material-icons mr-2">group_work</em> {% trans 'Badges' %}</a>
+                <a class="dropdown-item" href="{% url 'profile:edit' %}"><em class="material-icons mr-2">mode_edit</em> {% trans 'Edit Profile' %}</a>
+                <a class="dropdown-item" href="{% url 'profile:points' %}"><em class="material-icons mr-2">star</em> {% trans 'Points' %}</a>
+                <a class="dropdown-item" href="{% url 'profile:badges' %}"><em class="material-icons mr-2">group_work</em> {% trans 'Badges' %}</a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="{% url 'profile_logout' %}"><em class="material-icons mr-2">exit_to_app</em> {% trans 'Logout' %}</a>
+                <a class="dropdown-item" href="{% url 'profile:logout' %}"><em class="material-icons mr-2">exit_to_app</em> {% trans 'Logout' %}</a>
 
                 </div>
               </li>
@@ -51,19 +51,19 @@
 
         <ul class="navdrawer-nav mb-0">
             <li class="nav-item">
-            <a class="nav-link" href="{% url 'oppia_course' %}">
+            <a class="nav-link" href="{% url 'oppia:course' %}">
               <em class="material-icons mr-3">book</em> {% trans 'menu_courses' %}
             </a>
             </li>
 
             <li class="nav-item">
-            <a class="nav-link" href="{% url 'oppia_av_home' %}">
+            <a class="nav-link" href="{% url 'av:index' %}">
               <em class="material-icons mr-3">video_library</em> {% trans 'Media' %}
             </a>
             </li>
 
             <li class="nav-item">
-            <a class="nav-link" href="{% url 'oppia_cohorts' %}">
+            <a class="nav-link" href="{% url 'oppia:cohorts' %}">
               <em class="material-icons mr-3">school</em> {% trans 'Cohorts' %}
             </a>
             </li>
@@ -79,31 +79,31 @@
         <div class="collapse" id="upload-menu">
             <ul class="navdrawer-nav">
                 <li class="nav-item">
-                <a class="nav-link pl-5" href="{% url 'profile_upload' %}">
+                <a class="nav-link pl-5" href="{% url 'profile:upload' %}">
               <em class="material-icons mr-3">account_circle</em> {% trans 'Users' %}
                 </a>
                 </li>
 
                 <li class="nav-item">
-                <a class="nav-link pl-5" href="{% url 'oppia_upload' %}">
+                <a class="nav-link pl-5" href="{% url 'oppia:upload' %}">
                   <em class="material-icons mr-3">book</em> {% trans 'Course' %}
                 </a>
                 </li>
 
                 <li class="nav-item">
-                <a class="nav-link pl-5" href="{% url 'oppia_av_upload' %}">
+                <a class="nav-link pl-5" href="{% url 'av:upload' %}">
                   <em class="material-icons mr-3">video_library</em> {% trans 'Media' %}
                 </a>
                 </li>
 
                 <li class="nav-item">
-                <a class="nav-link pl-5" href="{% url 'oppia_media_embed_helper' %}">
+                <a class="nav-link pl-5" href="{% url 'content:media_embed_helper' %}">
                   <em class="material-icons mr-3">art_track</em> {% trans 'Media Embed Helper' %}
                 </a>
                 </li>
 
                 <li class="nav-item">
-                <a class="nav-link pl-5" href="{% url 'oppia_activitylog_upload' %}">
+                <a class="nav-link pl-5" href="{% url 'activitylog:upload' %}">
                   <em class="material-icons mr-3">list_alt</em> {% trans 'Activity Log' %}
                 </a>
                 </li>
@@ -114,13 +114,13 @@
         <p class="navdrawer-subheader"> <em class="material-icons mr-1">group</em> {% trans 'Admin' %}</p>
         <ul class="navdrawer-nav">
             <li class="nav-item">
-            <a class="nav-link" href="{% url 'profile_search_users' %}">
+            <a class="nav-link" href="{% url 'profile:search' %}">
               <em class="material-icons mr-3">search</em> {% trans 'Search users' %}
             </a>
             </li>
 
             <li class="nav-item">
-            <a class="nav-link" href="{% url 'profile_export' %}">
+            <a class="nav-link" href="{% url 'profile:export' %}">
               <em class="material-icons mr-3">save_alt</em> {% trans 'Export users' %}
             </a>
             </li>
@@ -132,14 +132,14 @@
         <p class="navdrawer-subheader"><em class="material-icons mr-1">timeline</em>{% trans 'Analytics' %}</p>
         <ul class="navdrawer-nav">
             <li class="nav-item">
-            <a class="nav-link" href="{% url 'oppia_viz_summary' %}">
+            <a class="nav-link" href="{% url 'viz:summary' %}">
               <em class="material-icons mr-3">pie_chart</em> {% trans 'Summary Overview' %}
             </a>
             </li>
 
 			{% if OPPIA_MAP_VISUALISATION_ENABLED %}
             <li class="nav-item">
-            <a class="nav-link" href="{% url 'oppia_viz_map' %}">
+            <a class="nav-link" href="{% url 'viz:map' %}">
               <em class="material-icons mr-3">map</em> {% trans 'Activity Map' %}
             </a>
             </li>
@@ -158,18 +158,18 @@
 
 		<ul class="navdrawer-nav">
 			<li class="nav-item">
-			<a class="nav-link" href="{% url 'oppia_integrations_home' %}">
+			<a class="nav-link" href="{% url 'integrations:index' %}">
 				<em class="material-icons mr-1">extension</em> {% trans 'Integrations' %}
 			</a>
 			</li>
             <li class="nav-item">
-            <a class="nav-link" href="{% url 'oppia_integrations_dhis_home' %}">
+            <a class="nav-link" href="{% url 'integrations:dhis:index' %}">
               <em class="material-icons mr-3">perm_media</em> {% trans 'DHIS2' %}
             </a>
             </li>
 
             <li class="nav-item">
-            <a class="nav-link" href="{% url 'oppia_integrations_xapi_home' %}">
+            <a class="nav-link" href="{% url 'integrations:xapi:index' %}">
               <em class="material-icons mr-3">perm_media</em> {% trans 'xAPI' %}
             </a>
             </li>

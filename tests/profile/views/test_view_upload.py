@@ -23,7 +23,7 @@ class UserUploadActivityViewTest(OppiaTransactionTestCase):
         './oppia/fixtures/reference_files/upload-user-file-valid-with-password.csv'
 
     template = 'profile/upload.html'
-    url = reverse('profile_upload')
+    url = reverse('profile:upload')
 
     def setUp(self):
         super(UserUploadActivityViewTest, self).setUp()
@@ -122,5 +122,5 @@ class UserUploadActivityViewTest(OppiaTransactionTestCase):
         # check can login with new password
         self.client.logout()
         self.client.login(username='user100', password='password100')
-        self.client.get(reverse('oppia_home'))
+        self.client.get(reverse('oppia:index'))
         self.assertTemplateUsed('profile/user-scorecard.htm')

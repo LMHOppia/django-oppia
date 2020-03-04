@@ -8,12 +8,7 @@ from django.utils import timezone
 from settings import constants
 from settings.models import SettingProperties
 
-from viz.views import summary_get_registrations, \
-                      summary_get_countries, \
-                      summary_get_languages, \
-                      summary_get_downloads, \
-                      summary_get_course_activity, \
-                      summary_get_searches
+from viz.views import Summary
 
 
 class VisualisationsTest(OppiaTestCase):
@@ -38,14 +33,14 @@ class VisualisationsTest(OppiaTestCase):
 
         for allowed_user in allowed_users:
             self.client.force_login(allowed_user)
-            response = self.client.get(reverse('oppia_viz_summary'))
+            response = self.client.get(reverse('viz:summary'))
 
             self.assertTemplateUsed(response, self.viz_summary_template)
             self.assertEqual(response.status_code, 200)
 
         for disallowed_user in disallowed_users:
             self.client.force_login(disallowed_user)
-            response = self.client.get(reverse('oppia_viz_summary'))
+            response = self.client.get(reverse('viz:summary'))
             self.assertEqual(response.status_code, 302)
 
     # test posting dates (
@@ -54,7 +49,7 @@ class VisualisationsTest(OppiaTestCase):
     def test_view_summary_previous_date(self):
         self.client.force_login(self.admin_user)
         start_date = timezone.now() - datetime.timedelta(days=31)
-        response = self.client.post(reverse('oppia_viz_summary'),
+        response = self.client.post(reverse('viz:summary'),
                                     data={'start_date': start_date})
         self.assertTemplateUsed(response, self.viz_summary_template)
         self.assertEqual(response.status_code, 200)
@@ -64,7 +59,7 @@ class VisualisationsTest(OppiaTestCase):
     def test_view_summary_future_date(self):
         self.client.force_login(self.admin_user)
         start_date = timezone.now() + datetime.timedelta(days=31)
-        response = self.client.post(reverse('oppia_viz_summary'),
+        response = self.client.post(reverse('viz:summary'),
                                     data={'start_date': start_date})
         self.assertTemplateUsed(response, self.viz_summary_template)
         self.assertEqual(response.status_code, 200)
@@ -74,7 +69,7 @@ class VisualisationsTest(OppiaTestCase):
     def test_view_summary_invalid_date(self):
         self.client.force_login(self.admin_user)
         start_date = "not a valid date"
-        response = self.client.post(reverse('oppia_viz_summary'),
+        response = self.client.post(reverse('viz:summary'),
                                     data={'start_date': start_date})
         self.assertTemplateUsed(response, self.viz_summary_template)
         self.assertEqual(200, response.status_code)
@@ -92,7 +87,7 @@ class VisualisationsTest(OppiaTestCase):
 
         for allowed_user in allowed_users:
             self.client.force_login(allowed_user)
-            response = self.client.get(reverse('oppia_viz_map'))
+            response = self.client.get(reverse('viz:map'))
             self.assertEqual(404, response.status_code)
 
     def test_view_map_enabled(self):
@@ -107,7 +102,7 @@ class VisualisationsTest(OppiaTestCase):
 
         for allowed_user in allowed_users:
             self.client.force_login(allowed_user)
-            response = self.client.get(reverse('oppia_viz_map'))
+            response = self.client.get(reverse('viz:map'))
             self.assertTemplateUsed(response, 'viz/map.html')
             self.assertEqual(response.status_code, 200)
 
@@ -116,23 +111,26 @@ class VisualisationsTest(OppiaTestCase):
         due to SQLite")
     def test_summary_helper_reg(self):
         start_date = timezone.now() - datetime.timedelta(days=365)
-
+        summary = Summary()
         user_registrations, previous_user_registrations = \
-            summary_get_registrations(start_date)
+            summary.get_registrations(start_date)
         self.assertEqual(user_registrations.count(), 0)
         self.assertEqual(previous_user_registrations, 4)
 
     def test_summary_helper_countries(self):
         start_date = timezone.now() - datetime.timedelta(days=365)
         # Countries
-        total_countries, country_activity = summary_get_countries(start_date)
+        summary = Summary()
+        total_countries, country_activity = \
+            summary.get_countries(start_date)
         self.assertEqual(len(country_activity), 21)
         self.assertEqual(total_countries, 51)
 
     def test_summary_helper_langs(self):
         start_date = timezone.now() - datetime.timedelta(days=365)
         # Language
-        languages = summary_get_languages(start_date)
+        summary = Summary()
+        languages = summary.get_languages(start_date)
         self.assertEqual(len(languages), 3)
 
     @pytest.mark.xfail(reason="works on local, but not on Github workflow \
@@ -140,8 +138,9 @@ class VisualisationsTest(OppiaTestCase):
     def test_summary_helper_downloads(self):
         start_date = timezone.now() - datetime.timedelta(days=365)
         # Course Downloads
+        summary = Summary()
         course_downloads, previous_course_downloads = \
-            summary_get_downloads(start_date)
+            summary.get_downloads(start_date)
         self.assertEqual(course_downloads.count(), 0)
         self.assertEqual(previous_course_downloads, 0)
 
@@ -150,8 +149,9 @@ class VisualisationsTest(OppiaTestCase):
     def test_summary_helper_activity(self):
         start_date = timezone.now() - datetime.timedelta(days=365)
         # Course Activity
+        summary = Summary()
         course_activity, previous_course_activity, hot_courses = \
-            summary_get_course_activity(start_date)
+            summary.get_course_activity(start_date)
         self.assertEqual(course_activity.count(), 0)
         self.assertEqual(previous_course_activity, 0)
         self.assertEqual(len(hot_courses), 0)
@@ -161,6 +161,7 @@ class VisualisationsTest(OppiaTestCase):
     def test_summary_helper_search(self):
         start_date = timezone.now() - datetime.timedelta(days=365)
         # Searches
-        searches, previous_searches = summary_get_searches(start_date)
+        summary = Summary()
+        searches, previous_searches = summary.get_searches(start_date)
         self.assertEqual(searches.count(), 0)
         self.assertEqual(previous_searches, 0)

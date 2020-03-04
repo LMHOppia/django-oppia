@@ -54,72 +54,72 @@ class PermissionsViewTest(OppiaTestCase):
     # Upload courses view
 
     def test_anon_cantview_upload_courses(self):
-        self.assert_must_login('oppia_upload')
+        self.assert_must_login('oppia:upload')
 
     def test_admin_canview_upload_courses(self):
-        self.assert_can_view('oppia_upload', self.admin_user)
+        self.assert_can_view('oppia:upload', self.admin_user)
 
     def test_staff_canview_upload_courses(self):
-        self.assert_can_view('oppia_upload', self.staff_user)
+        self.assert_can_view('oppia:upload', self.staff_user)
 
     def test_student_cantview_upload_courses(self):
-        self.assert_unauthorized('oppia_upload', self.normal_user)
+        self.assert_unauthorized('oppia:upload', self.normal_user)
 
     def test_user_with_canupload_canview_upload_courses(self):
-        self.assert_can_view('oppia_upload', self.teacher_user)
+        self.assert_can_view('oppia:upload', self.teacher_user)
 
     # Bulk upload users view
 
     def test_anon_cantview_bulk_upload(self):
-        self.assert_must_login('profile_upload')
+        self.assert_must_login('profile:upload')
 
     def test_admin_canview_bulk_upload(self):
-        self.assert_can_view('profile_upload', self.admin_user)
+        self.assert_can_view('profile:upload', self.admin_user)
 
     def test_staff_cantview_bulk_upload(self):
-        self.assert_unauthorized('profile_upload', self.staff_user)
+        self.assert_unauthorized('profile:upload', self.staff_user)
 
     def test_student_cantview_bulk_upload(self):
-        self.assert_unauthorized('profile_upload', self.normal_user)
+        self.assert_unauthorized('profile:upload', self.normal_user)
 
     # View cohort list
 
     def test_anon_cantview_cohorts(self):
-        self.assert_must_login('oppia_cohorts')
+        self.assert_must_login('oppia:cohorts')
 
     def test_admin_canview_cohorts(self):
-        self.assert_can_view('oppia_cohorts', self.admin_user)
+        self.assert_can_view('oppia:cohorts', self.admin_user)
 
     def test_staff_canview_cohorts(self):
-        self.assert_can_view('oppia_cohorts', self.staff_user)
+        self.assert_can_view('oppia:cohorts', self.staff_user)
 
     def test_student_cantview_cohorts(self):
-        self.assert_unauthorized('oppia_cohorts', self.normal_user)
+        self.assert_unauthorized('oppia:cohorts', self.normal_user)
     # TODO: Define a teacher user to test cohort management
 
     # View a cohort
 
     def test_anon_cantview_cohort(self):
-        self.assert_must_login('oppia_cohort_view',
+        self.assert_must_login('oppia:cohort_view',
                                view_kwargs={'cohort_id': 1})
 
     def test_view_nonexisting_cohort(self):
-        self.assert_not_found('oppia_cohort_view',
+        self.assert_not_found('oppia:cohort_view',
                               self.admin_user,
                               view_kwargs={'cohort_id': 1000})
 
     def test_admin_canview_cohort(self):
-        self.assert_can_view('oppia_cohort_view',
+        self.assert_can_view('oppia:cohort_view',
                              self.admin_user,
                              view_kwargs={'cohort_id': 1})
 
     def test_staff_canview_cohort(self):
-        self.assert_can_view('oppia_cohort_view',
+        self.assert_can_view('oppia:cohort_view',
                              self.staff_user,
                              view_kwargs={'cohort_id': 1})
 
     def test_student_cantview_cohort(self):
-        self.assert_unauthorized('oppia_cohort_view',
+        self.assert_unauthorized('oppia:cohort_view',
                                  self.normal_user,
                                  view_kwargs={'cohort_id': 1})
     # TODO: Teacher view cohort s/he is assigned into
@@ -127,84 +127,84 @@ class PermissionsViewTest(OppiaTestCase):
     # View a cohort course activity
 
     def test_anon_cantview_cohort_course(self):
-        self.assert_must_login('oppia_cohort_course_view',
+        self.assert_must_login('oppia:cohort_course_view',
                                view_kwargs={'cohort_id': 1, 'course_id': 1})
 
     def test_view_nonexisting_cohort_course(self):
-        self.assert_not_found('oppia_cohort_course_view', self.admin_user,
+        self.assert_not_found('oppia:cohort_course_view', self.admin_user,
                               view_kwargs={'cohort_id': 1000,
                                            'course_id': 1000})
 
     def test_admin_canview_cohort_course(self):
-        self.assert_can_view('oppia_cohort_course_view',
+        self.assert_can_view('oppia:cohort_course_view',
                              self.admin_user,
                              view_kwargs={'cohort_id': 1, 'course_id': 1})
 
     def test_staff_canview_cohort_course(self):
-        self.assert_can_view('oppia_cohort_course_view',
+        self.assert_can_view('oppia:cohort_course_view',
                              self.staff_user,
                              view_kwargs={'cohort_id': 1, 'course_id': 1})
 
     def test_student_cantview_cohort_course(self):
-        self.assert_unauthorized('oppia_cohort_course_view', self.normal_user,
+        self.assert_unauthorized('oppia:cohort_course_view', self.normal_user,
                                  view_kwargs={'cohort_id': 1, 'course_id': 1})
     # TODO: Teacher view cohort s/he is assigned into
 
     # Add new cohort
 
     def test_anon_cantview_add_cohort(self):
-        self.assert_must_login('oppia_cohort_add')
+        self.assert_must_login('oppia:cohort_add')
 
     def test_admin_canview_add_cohort(self):
-        self.assert_can_view('oppia_cohort_add', self.admin_user)
+        self.assert_can_view('oppia:cohort_add', self.admin_user)
 
     def test_staff_canview_add_cohort(self):
-        self.assert_can_view('oppia_cohort_add', self.staff_user)
+        self.assert_can_view('oppia:cohort_add', self.staff_user)
 
     def test_student_cantview_add_cohort(self):
-        self.assert_unauthorized('oppia_cohort_add', self.normal_user)
+        self.assert_unauthorized('oppia:cohort_add', self.normal_user)
 
     # courses list view
 
     def test_anon_cantview_courses_list(self):
-        self.assert_must_login('oppia_course')
+        self.assert_must_login('oppia:course')
 
     def test_admin_canview_courses_list(self):
-        res = self.assert_can_view('oppia_course', self.admin_user)
+        res = self.assert_can_view('oppia:course', self.admin_user)
         # check that the number of courses include the draft ones
         self.assertEqual(4, res.context['page'].paginator.count)
 
     def test_staff_cantview_courses_list(self):
-        res = self.assert_can_view('oppia_course', self.staff_user)
+        res = self.assert_can_view('oppia:course', self.staff_user)
         # check that the number of courses include the draft ones
         self.assertEqual(4, res.context['page'].paginator.count)
 
     def test_student_cantview_courses_list(self):
-        self.assert_unauthorized('oppia_course', self.normal_user)
+        self.assert_unauthorized('oppia:course', self.normal_user)
 
     # View course recent activity
 
     def test_anon_cantview_course_activity(self):
-        self.assert_must_login('oppia_recent_activity',
+        self.assert_must_login('oppia:recent_activity',
                                view_kwargs={'course_id': 1})
 
     def test_view_nonexisting_course_activity(self):
-        self.assert_not_found('oppia_recent_activity',
+        self.assert_not_found('oppia:recent_activity',
                               self.admin_user,
                               view_kwargs={'course_id': 1000})
 
     def test_admin_canview_course_activity(self):
-        self.assert_can_view('oppia_recent_activity',
+        self.assert_can_view('oppia:recent_activity',
                              self.admin_user,
                              view_kwargs={'course_id': 1})
 
     def test_staff_canview_course_activity(self):
-        self.assert_can_view('oppia_recent_activity',
+        self.assert_can_view('oppia:recent_activity',
                              self.staff_user,
                              view_kwargs={'course_id': 1})
 
     def test_student_canview_course_activity(self):
-        self.assert_unauthorized('oppia_recent_activity',
+        self.assert_unauthorized('oppia:recent_activity',
                                  self.normal_user,
                                  view_kwargs={'course_id': 1})
     # TODO: Teacher view course activity for courses assigned to
@@ -212,31 +212,31 @@ class PermissionsViewTest(OppiaTestCase):
     # View student activity (all activity)
 
     def test_anon_cantview_user_activity(self):
-        self.assert_must_login('profile_user_activity',
+        self.assert_must_login('profile:user_activity',
                                view_kwargs={'user_id': 1})
 
     def test_view_nonexisting_user_activity(self):
-        self.assert_not_found('profile_user_activity',
+        self.assert_not_found('profile:user_activity',
                               self.admin_user,
                               view_kwargs={'user_id': 1000})
 
     def test_admin_canview_user_activity(self):
-        self.assert_can_view('profile_user_activity',
+        self.assert_can_view('profile:user_activity',
                              self.admin_user,
                              view_kwargs={'user_id': 1})
 
     def test_staff_canview_user_activity(self):
-        self.assert_can_view('profile_user_activity',
+        self.assert_can_view('profile:user_activity',
                              self.staff_user,
                              view_kwargs={'user_id': 1})
 
     def test_student_cantview_user_activity(self):
-        self.assert_unauthorized('profile_user_activity',
+        self.assert_unauthorized('profile:user_activity',
                                  self.normal_user,
                                  view_kwargs={'user_id': 1})
 
     def test_student_canview_self_activity(self):
-        self.assert_can_view('profile_user_activity',
+        self.assert_can_view('profile:user_activity',
                              self.normal_user,
                              view_kwargs={'user_id': 2})
     # @TODO: Teacher view user activity of a user in a cohort he is assigned
@@ -244,31 +244,31 @@ class PermissionsViewTest(OppiaTestCase):
     # View student activity (for a course)
 
     def test_anon_cantview_user_course_activity(self):
-        self.assert_must_login('profile_user_course_activity',
+        self.assert_must_login('profile:user_course_activity',
                                view_kwargs={'course_id': 1, 'user_id': 1})
 
     def test_view_nonexisting_user_course_activity(self):
-        self.assert_not_found('profile_user_course_activity', self.admin_user,
+        self.assert_not_found('profile:user_course_activity', self.admin_user,
                               view_kwargs={'course_id': 1000,
                                            'user_id': 1000})
 
     def test_admin_canview_user_course_activity(self):
-        self.assert_can_view('profile_user_course_activity',
+        self.assert_can_view('profile:user_course_activity',
                              self.admin_user,
                              view_kwargs={'course_id': 1, 'user_id': 1})
 
     def test_staff_canview_user_course_activity(self):
-        self.assert_can_view('profile_user_course_activity',
+        self.assert_can_view('profile:user_course_activity',
                              self.staff_user,
                              view_kwargs={'course_id': 1, 'user_id': 1})
 
     def test_student_cantview_user_course_activity(self):
-        self.assert_unauthorized('profile_user_course_activity',
+        self.assert_unauthorized('profile:user_course_activity',
                                  self.normal_user,
                                  view_kwargs={'course_id': 1, 'user_id': 1})
 
     def test_student_canview_self_course_activity(self):
-        self.assert_can_view('profile_user_course_activity',
+        self.assert_can_view('profile:user_course_activity',
                              self.normal_user,
                              view_kwargs={'course_id': 1, 'user_id': 2})
     # TODO: Teacher view user activity of a user in a cohort he is assigned
@@ -276,21 +276,21 @@ class PermissionsViewTest(OppiaTestCase):
     # analytics summary overview
 
     def test_anon_cantview_summary_overview(self):
-        self.assert_must_login('oppia_viz_summary')
+        self.assert_must_login('viz:summary')
 
     @pytest.mark.xfail(reason="works on local, but not on Github workflow \
         due to SQLite")
     def test_admin_canview_summary_overview(self):
-        self.assert_can_view('oppia_viz_summary', self.admin_user)
+        self.assert_can_view('viz:summary', self.admin_user)
 
     @pytest.mark.xfail(reason="works on local, but not on Github workflow \
         due to SQLite")
     def test_staff_canview_summary_overview(self):
-        self.assert_can_view('oppia_viz_summary', self.staff_user)
+        self.assert_can_view('viz:summary', self.staff_user)
 
     def test_student_cantview_summary_overview(self):
         self.client.force_login(self.normal_user)
-        response = self.client.get(reverse('oppia_viz_summary'))
+        response = self.client.get(reverse('viz:summary'))
         self.assertEqual(response.status_code, 302)
 
     # Test is_manager permissions

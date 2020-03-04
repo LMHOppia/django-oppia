@@ -13,12 +13,12 @@ class LoginViewTest(OppiaTestCase):
     def test_already_logged_in_admin(self):
         self.client.force_login(user=self.admin_user)
         response = self.client.get(self.login_url)
-        self.assertRedirects(response, reverse('oppia_home'), 302, 200)
+        self.assertRedirects(response, reverse('oppia:index'), 302, 200)
 
     def test_already_logged_in_staff(self):
         self.client.force_login(user=self.staff_user)
         response = self.client.get(self.login_url)
-        self.assertRedirects(response, reverse('oppia_home'), 302, 200)
+        self.assertRedirects(response, reverse('oppia:index'), 302, 200)
 
     def test_already_logged_in_teacher(self):
         self.client.force_login(user=self.teacher_user)
@@ -31,3 +31,23 @@ class LoginViewTest(OppiaTestCase):
         response = self.client.get(self.login_url, follow=True)
         self.assertTemplateUsed(response, 'profile/user-scorecard.html')
         self.assertEqual(response.status_code, 200)
+
+    def test_login_no_redirect(self):
+        data = {'username': 'admin',
+                'password': 'password'}
+        response = self.client.post(self.login_url, data=data)
+        self.assertRedirects(response, reverse('oppia:index'), 302, 200)
+
+    def test_login_valid_redirect(self):
+        data = {'username': 'admin',
+                'password': 'password',
+                'next': '/course/'}
+        response = self.client.post(self.login_url, data=data)
+        self.assertRedirects(response, reverse('oppia:course'), 302, 200)
+
+    def test_login_invalid_redirect(self):
+        data = {'username': 'admin',
+                'password': 'password',
+                'next': 'http://mysite.com/'}
+        response = self.client.post(self.login_url, data=data)
+        self.assertRedirects(response, reverse('oppia:index'), 302, 200)

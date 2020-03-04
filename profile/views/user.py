@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import (authenticate, login)
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
@@ -9,6 +9,8 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.utils.translation import ugettext as _
 from tastypie.models import ApiKey
+
+from urllib.parse import urlparse
 
 from oppia import emailer
 from oppia.models import Points, Award, Tracker
@@ -24,13 +26,14 @@ from settings import constants
 from settings.models import SettingProperties
 
 STR_COMMON_FORM = 'common/form/form.html'
+STR_OPPIA_HOME = 'oppia:index'
 
 def login_view(request):
     username = password = ''
 
     # if already logged in
     if request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('oppia_home'))
+        return HttpResponseRedirect(reverse(STR_OPPIA_HOME))
 
     if request.POST:
         form = LoginForm(request.POST)
@@ -42,9 +45,13 @@ def login_view(request):
         if user is not None and user.is_active:
             login(request, user)
             if next is not None:
-                return HttpResponseRedirect(next)
+                parsed_uri = urlparse(next)
+                if parsed_uri.netloc == '':
+                    return HttpResponseRedirect(next)
+                else:
+                    return HttpResponseRedirect(reverse(STR_OPPIA_HOME))
             else:
-                return HttpResponseRedirect(reverse('oppia_home'))
+                return HttpResponseRedirect(reverse(STR_OPPIA_HOME))
     else:
         form = LoginForm(initial={'next': filter_redirect(request.GET), })
 
