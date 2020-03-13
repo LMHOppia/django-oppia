@@ -8,7 +8,7 @@ from tastypie.resources import ModelResource
 
 from api.serializers import UserJSONSerializer
 from profile.forms import ProfileForm
-from profile.models import UserProfile, CustomField, UserProfileCustomField
+from profile.models import UserProfile, CustomField
 
 from api.utils import check_required_params
 
@@ -28,8 +28,8 @@ class ProfileUpdateResource(ModelResource):
     def process_profile_update_base_profile(self, bundle):
         user_profile, created = UserProfile.objects \
             .get_or_create(user=bundle.obj)
-        if 'jobtitle' in bundle.data:
-            user_profile.job_title = bundle.data['jobtitle']
+        if 'job_title' in bundle.data:
+            user_profile.job_title = bundle.data['job_title']
         if 'organisation' in bundle.data:
             user_profile.organisation = bundle.data['organisation']
         if 'phoneno' in bundle.data:
@@ -37,12 +37,11 @@ class ProfileUpdateResource(ModelResource):
         user_profile.save()
         return user_profile
 
-
     def process_profile_update(self, bundle):
         data = {'email': bundle.data['email']
-        if 'email' in bundle.data else '',
-                'first_name': bundle.data['firstname'],
-                'last_name': bundle.data['lastname'],
+                if 'email' in bundle.data else '',
+                'first_name': bundle.data['first_name'],
+                'last_name': bundle.data['last_name'],
                 'username': bundle.request.user}
 
         custom_fields = CustomField.objects.all()
@@ -61,8 +60,8 @@ class ProfileUpdateResource(ModelResource):
             raise BadRequest(str)
         else:
             email = bundle.data['email'] if 'email' in bundle.data else ''
-            first_name = bundle.data['firstname']
-            last_name = bundle.data['lastname']
+            first_name = bundle.data['first_name']
+            last_name = bundle.data['last_name']
 
         try:
             bundle.obj = User.objects.get(username=bundle.request.user)
@@ -78,12 +77,11 @@ class ProfileUpdateResource(ModelResource):
         # Create any CustomField entries
         user_profile.update_customfields(bundle.data)
 
-
         return bundle
 
     def obj_create(self, bundle, **kwargs):
-        required = ['firstname',
-                    'lastname']
+        required = ['first_name',
+                    'last_name']
         check_required_params(bundle, required)
 
         # can't edit another users account

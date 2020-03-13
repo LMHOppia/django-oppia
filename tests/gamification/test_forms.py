@@ -1,7 +1,6 @@
 import pytest
 
 from django.urls import reverse
-from gamification.forms import GamificationEventForm
 from gamification.models import ActivityGamificationEvent, \
                                 CourseGamificationEvent, \
                                 MediaGamificationEvent
@@ -41,7 +40,7 @@ class GamificationFormsTest(OppiaTestCase):
         # Need to upload the file first to make sure it's properly loaded
         with open(self.course_file_path, 'rb') as course_file:
             self.client.force_login(self.admin_user)
-            self.client.post(reverse('oppia_upload'),
+            self.client.post(reverse('oppia:upload'),
                              {'course_file': course_file})
 
         data = {
@@ -74,7 +73,8 @@ class GamificationFormsTest(OppiaTestCase):
         # course
         self.assertEqual(course_start_count, course_end_count)
 
-        course_game = CourseGamificationEvent.objects.get(course__id=2,
+        course_game = CourseGamificationEvent.objects.get(
+            course__id=2,
             event='course_downloaded')
         self.assertEqual(500, course_game.points)
 
@@ -84,7 +84,7 @@ class GamificationFormsTest(OppiaTestCase):
         # Need to upload the file first to make sure it's properly loaded
         with open(self.course_file_path, 'rb') as course_file:
             self.client.force_login(self.admin_user)
-            self.client.post(reverse('oppia_upload'),
+            self.client.post(reverse('oppia:upload'),
                              {'course_file': course_file})
 
         data = {
@@ -128,7 +128,7 @@ class GamificationFormsTest(OppiaTestCase):
         # Need to upload the file first to make sure it's properly loaded
         with open(self.course_file_path, 'rb') as course_file:
             self.client.force_login(self.admin_user)
-            self.client.post(reverse('oppia_upload'),
+            self.client.post(reverse('oppia:upload'),
                              {'course_file': course_file})
 
         # get id for the intro page on first section
@@ -170,7 +170,7 @@ class GamificationFormsTest(OppiaTestCase):
         # Need to upload the file first to make sure it's properly loaded
         with open(self.course_file_path, 'rb') as course_file:
             self.client.force_login(self.admin_user)
-            self.client.post(reverse('oppia_upload'),
+            self.client.post(reverse('oppia:upload'),
                              {'course_file': course_file})
 
         # get id for the intro page on first section
@@ -217,7 +217,7 @@ class GamificationFormsTest(OppiaTestCase):
         # Need to upload the file first to make sure it's properly loaded
         with open(self.media_course_file_path, 'rb') as course_file:
             self.client.force_login(self.admin_user)
-            self.client.post(reverse('oppia_upload'),
+            self.client.post(reverse('oppia:upload'),
                              {'course_file': course_file})
 
         # get id of media
@@ -258,7 +258,7 @@ class GamificationFormsTest(OppiaTestCase):
         # Need to upload the file first to make sure it's properly loaded
         with open(self.media_course_file_path, 'rb') as course_file:
             self.client.force_login(self.admin_user)
-            self.client.post(reverse('oppia_upload'),
+            self.client.post(reverse('oppia:upload'),
                              {'course_file': course_file})
 
         # get id of media

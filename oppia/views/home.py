@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.db.models import Count, Sum
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
@@ -34,84 +34,99 @@ def about_view(request):
 
 def home_view(request):
 
-    activity = []
-    leaderboard = None
-
     if request.user.is_authenticated:
         up = request.user.userprofile
-
-        dashboard_accessed.send(sender=None, request=request, data=None)
-
         # if user is student redirect to their scorecard
         if up.is_student_only():
-            return HttpResponseRedirect(reverse('profile_user_activity',
+            return HttpResponseRedirect(reverse('profile:user_activity',
                                                 args=[request.user.id]))
 
         # is user is teacher redirect to teacher home
         if up.is_teacher_only():
-            return HttpResponseRedirect(reverse('oppia_teacher_home'))
+            return HttpResponseRedirect(reverse('oppia:teacher_index'))
 
-        start_date = timezone.now() - datetime.timedelta(days=31)
-        end_date = timezone.now()
-        interval = 'days'
-        if request.method == 'POST':
-            form = DateRangeIntervalForm(request.POST)
-            if form.is_valid():
-                start_date = form.cleaned_data.get("start_date")
-                start_date = datetime.datetime.strptime(start_date,
-                                                        "%Y-%m-%d")
-                end_date = form.cleaned_data.get("end_date")
-                end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d")
-                interval = form.cleaned_data.get("interval")
-        else:
-            data = {}
-            data['start_date'] = start_date
-            data['end_date'] = end_date
-            data['interval'] = interval
-            form = DateRangeIntervalForm(initial=data)
-
-        if interval == 'days':
-            no_days = (end_date - start_date).days + 1
-            tracker_stats = CourseDailyStats.objects \
-                .filter(day__gte=start_date,
-                        day__lte=end_date) \
-                .values('day') \
-                .annotate(count=Sum('total'))
-
-            for i in range(0, no_days, +1):
-                temp = start_date + datetime.timedelta(days=i)
-                count = next((dct['count']
-                              for dct in tracker_stats
-                              if dct['day'] == temp.date()), 0)
-                activity.append([temp.strftime("%d %b %Y"), count])
-        else:
-            delta = relativedelta(months=+1)
-
-            no_months = 0
-            tmp_date = start_date
-            while tmp_date <= end_date:
-                tmp_date += delta
-                no_months += 1
-
-            for i in range(0, no_months, +1):
-                temp = start_date + relativedelta(months=+i)
-                month = temp.strftime("%m")
-                year = temp.strftime("%Y")
-                count = CourseDailyStats.objects \
-                    .filter(day__month=month, day__year=year) \
-                    .aggregate(total=Sum('total')).get('total', 0)
-                activity.append([temp.strftime("%b %Y"),
-                                 0 if count is None else count])
-
+        # admin/staff view
+        form, activity = home_view_admin_authenticated(request)
         leaderboard = Points.get_leaderboard(10)
-
     else:
+        activity = []
+        leaderboard = None
         form = None
 
     return render(request, 'oppia/home.html',
                   {'form': form,
                    'activity_graph_data': activity,
                    'leaderboard': leaderboard})
+
+
+def home_view_admin_authenticated(request):
+    activity = []
+
+    dashboard_accessed.send(sender=None, request=request, data=None)
+
+    start_date = timezone.now() - datetime.timedelta(days=31)
+    end_date = timezone.now()
+    interval = 'days'
+    if request.method == 'POST':
+        form = DateRangeIntervalForm(request.POST)
+        if form.is_valid():
+            start_date = form.cleaned_data.get("start_date")
+            start_date = datetime.datetime.strptime(start_date,
+                                                    "%Y-%m-%d")
+            end_date = form.cleaned_data.get("end_date")
+            end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d")
+            interval = form.cleaned_data.get("interval")
+    else:
+        data = {}
+        data['start_date'] = start_date
+        data['end_date'] = end_date
+        data['interval'] = interval
+        form = DateRangeIntervalForm(initial=data)
+
+    if interval == 'days':
+        activity = process_home_activity_days(activity, start_date, end_date)
+    else:
+        activity = process_home_activity_months(activity, start_date, end_date)
+
+    return form, activity
+
+
+def process_home_activity_days(activity, start_date, end_date):
+    no_days = (end_date - start_date).days + 1
+    tracker_stats = CourseDailyStats.objects \
+        .filter(day__gte=start_date,
+                day__lte=end_date) \
+        .values('day') \
+        .annotate(count=Sum('total'))
+
+    for i in range(0, no_days, +1):
+        temp = start_date + datetime.timedelta(days=i)
+        count = next((dct['count']
+                      for dct in tracker_stats
+                      if dct['day'] == temp.date()), 0)
+        activity.append([temp.strftime("%d %b %Y"), count])
+    return activity
+
+
+def process_home_activity_months(activity, start_date, end_date):
+    delta = relativedelta(months=+1)
+
+    no_months = 0
+    tmp_date = start_date
+    while tmp_date <= end_date:
+        tmp_date += delta
+        no_months += 1
+
+    for i in range(0, no_months, +1):
+        temp = start_date + relativedelta(months=+i)
+        month = temp.strftime("%m")
+        year = temp.strftime("%Y")
+        count = CourseDailyStats.objects \
+            .filter(day__month=month, day__year=year) \
+            .aggregate(total=Sum('total')).get('total', 0)
+        activity.append([temp.strftime("%b %Y"),
+                         0 if count is None else count])
+    return activity
 
 
 def teacher_home_view(request):
