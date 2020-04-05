@@ -8,7 +8,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='django-oppia',
-    version='0.12.5',
+    version='0.12.6',
     packages=[
         'oppia',
         'quiz',
@@ -48,7 +48,7 @@ setup(
         "django-crispy-forms >= 1.4.0",
         "pytz",
         "defusedxml==0.5.0",
-        "Pillow==6.2.0",
+        "Pillow==6.2.2",
         "sorl-thumbnail==12.5.0",
         "pycodestyle",
         "pytest",

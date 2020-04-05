@@ -1,6 +1,6 @@
 # coding: utf-8
 from django.contrib.auth.models import User
-from django.test import TestCase
+from django.test import TransactionTestCase
 from tastypie.test import ResourceTestCaseMixin
 
 from oppia.models import Points
@@ -8,23 +8,20 @@ from quiz.models import QuizAttemptResponse, QuizAttempt
 from tests.utils import get_api_key, get_api_url
 
 
-class QuizAttemptResourceTest(ResourceTestCaseMixin, TestCase):
+class QuizAttemptResourceTest(ResourceTestCaseMixin, TransactionTestCase):
     fixtures = ['tests/test_user.json',
                 'tests/test_oppia.json',
                 'tests/test_quiz.json',
                 'default_gamification_events.json']
 
-    def setUp(self):
-        super(QuizAttemptResourceTest, self).setUp()
-        self.username = 'demo'
-        user = User.objects.get(username=self.username)
-        api_key = get_api_key(user)
-        self.api_key = api_key.key
-        self.url = get_api_url('quizattempt')
+    username = 'demo'
+    url = get_api_url('v2', 'quizattempt')
 
     def get_credentials(self):
+        user = User.objects.get(username=self.username)
+        api_key = get_api_key(user)
         return self.create_apikey(username=self.username,
-                                  api_key=self.api_key)
+                                  api_key=api_key.key)
 
     def test_quiz_attempt_points_included(self):
 

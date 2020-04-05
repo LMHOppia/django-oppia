@@ -12,7 +12,7 @@ class RegisterResourceTest(ResourceTestCaseMixin, TestCase):
 
     def setUp(self):
         super(RegisterResourceTest, self).setUp()
-        self.url = get_api_url('register')
+        self.url = get_api_url('v2', 'register')
 
     # check get method not allowed
     def test_get_list_invalid(self):
@@ -25,8 +25,8 @@ class RegisterResourceTest(ResourceTestCaseMixin, TestCase):
             'password': 'secret',
             'email': 'demo@demo.com',
             'passwordagain': 'secret',
-            'firstname': 'demo',
-            'lastname': 'user',
+            'first_name': 'demo',
+            'last_name': 'user',
         }
         resp = self.api_client.post(self.url, format='json', data=data)
         self.assertHttpBadRequest(resp)
@@ -38,8 +38,8 @@ class RegisterResourceTest(ResourceTestCaseMixin, TestCase):
             'username': 'demo2',
             'email': 'demo@demo.com',
             'passwordagain': 'secret',
-            'firstname': 'demo',
-            'lastname': 'user',
+            'first_name': 'demo',
+            'last_name': 'user',
         }
         resp = self.api_client.post(self.url, format='json', data=data)
         self.assertHttpBadRequest(resp)
@@ -51,14 +51,12 @@ class RegisterResourceTest(ResourceTestCaseMixin, TestCase):
             'username': 'demo2',
             'password': 'secret',
             'passwordagain': 'secret',
-            'firstname': 'demo',
-            'lastname': 'user',
+            'first_name': 'demo',
+            'last_name': 'user',
         }
         resp = self.api_client.post(self.url, format='json', data=data)
-        # LMH_custom_start
-        self.assertHttpCreated(resp)
+        self.assertHttpBadRequest(resp)
         self.assertValidJSON(resp.content)
-        # LMH_custom_end
 
     # check posting with invalid email
     def test_post_invalid_email(self):
@@ -67,8 +65,8 @@ class RegisterResourceTest(ResourceTestCaseMixin, TestCase):
             'password': 'secret',
             'email': 'thisisnotanemailaddress',
             'passwordagain': 'secret',
-            'firstname': 'demo',
-            'lastname': 'user',
+            'first_name': 'demo',
+            'last_name': 'user',
         }
         resp = self.api_client.post(self.url, format='json', data=data)
         self.assertHttpBadRequest(resp)
@@ -80,8 +78,8 @@ class RegisterResourceTest(ResourceTestCaseMixin, TestCase):
             'username': 'demo2',
             'password': 'secret',
             'email': 'demo@demo.com',
-            'firstname': 'demo',
-            'lastname': 'user',
+            'first_name': 'demo',
+            'last_name': 'user',
         }
         resp = self.api_client.post(self.url, format='json', data=data)
         self.assertHttpBadRequest(resp)
@@ -94,7 +92,7 @@ class RegisterResourceTest(ResourceTestCaseMixin, TestCase):
             'password': 'secret',
             'passwordagain': 'secret',
             'email': 'demo@demo.com',
-            'lastname': 'user',
+            'last_name': 'user',
         }
         resp = self.api_client.post(self.url, format='json', data=data)
         self.assertHttpBadRequest(resp)
@@ -107,8 +105,8 @@ class RegisterResourceTest(ResourceTestCaseMixin, TestCase):
             'password': 'secret',
             'passwordagain': 'secret',
             'email': 'demo@demo.com',
-            'firstname': 'd',
-            'lastname': 'user',
+            'first_name': 'd',
+            'last_name': 'user',
         }
         resp = self.api_client.post(self.url, format='json', data=data)
         self.assertHttpBadRequest(resp)
@@ -121,7 +119,7 @@ class RegisterResourceTest(ResourceTestCaseMixin, TestCase):
             'password': 'secret',
             'passwordagain': 'secret',
             'email': 'demo@demo.com',
-            'firstname': 'demo',
+            'first_name': 'demo',
         }
         resp = self.api_client.post(self.url, format='json', data=data)
         self.assertHttpBadRequest(resp)
@@ -134,8 +132,8 @@ class RegisterResourceTest(ResourceTestCaseMixin, TestCase):
             'password': 's',
             'passwordagain': 's',
             'email': 'demo@demo.com',
-            'firstname': 'demo',
-            'lastname': 'user',
+            'first_name': 'demo',
+            'last_name': 'user',
         }
         resp = self.api_client.post(self.url, format='json', data=data)
         self.assertHttpBadRequest(resp)
@@ -148,8 +146,8 @@ class RegisterResourceTest(ResourceTestCaseMixin, TestCase):
             'password': 's',
             'passwordagain': 'secret',
             'email': 'demo@demo.com',
-            'firstname': 'demo',
-            'lastname': 'user',
+            'first_name': 'demo',
+            'last_name': 'user',
         }
         resp = self.api_client.post(self.url, format='json', data=data)
         self.assertHttpBadRequest(resp)
@@ -162,8 +160,8 @@ class RegisterResourceTest(ResourceTestCaseMixin, TestCase):
             'password': 'secret',
             'passwordagain': 'secret',
             'email': 'demo@demo.com',
-            'firstname': 'demo',
-            'lastname': 'u',
+            'first_name': 'demo',
+            'last_name': 'u',
         }
         resp = self.api_client.post(self.url, format='json', data=data)
         self.assertHttpBadRequest(resp)
@@ -176,8 +174,8 @@ class RegisterResourceTest(ResourceTestCaseMixin, TestCase):
             'password': 'secret',
             'passwordagain': 'secret',
             'email': 'demo@demo.com',
-            'firstname': 'demo',
-            'lastname': 'user',
+            'first_name': 'demo',
+            'last_name': 'user',
         }
         resp = self.api_client.post(self.url, format='json', data=data)
         self.assertHttpCreated(resp)
@@ -190,8 +188,8 @@ class RegisterResourceTest(ResourceTestCaseMixin, TestCase):
             'password': 'secret',
             'passwordagain': 'secret',
             'email': 'demo@demo.com',
-            'firstname': 'demo',
-            'lastname': 'user',
+            'first_name': 'demo',
+            'last_name': 'user',
         }
         resp = self.api_client.post(self.url, format='json', data=data)
         self.assertHttpBadRequest(resp)
@@ -204,8 +202,8 @@ class RegisterResourceTest(ResourceTestCaseMixin, TestCase):
             'password': 'secret',
             'passwordagain': 'secret',
             'email': 'demo@me.com',
-            'firstname': 'demo',
-            'lastname': 'user',
+            'first_name': 'demo',
+            'last_name': 'user',
         }
         resp = self.api_client.post(self.url, format='json', data=data)
         self.assertHttpBadRequest(resp)
@@ -220,8 +218,8 @@ class RegisterResourceTest(ResourceTestCaseMixin, TestCase):
             'password': 'secret',
             'passwordagain': 'secret',
             'email': 'demo3@me.com',
-            'firstname': 'demo',
-            'lastname': 'user',
+            'first_name': 'demo',
+            'last_name': 'user',
         }
         response = self.api_client.post(self.url, format='json', data=data)
         self.assertHttpBadRequest(response)

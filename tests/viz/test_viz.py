@@ -1,5 +1,4 @@
 import datetime
-import pytest
 
 from oppia.test import OppiaTestCase
 from django.urls import reverse
@@ -25,8 +24,6 @@ class VisualisationsTest(OppiaTestCase):
 
     # summary
     # only staff/admins can view
-    @pytest.mark.xfail(reason="works on local, but not on Github workflow \
-        due to SQLite")
     def test_view_summary(self):
         allowed_users = [self.admin_user, self.staff_user]
         disallowed_users = [self.teacher_user, self.normal_user]
@@ -44,8 +41,6 @@ class VisualisationsTest(OppiaTestCase):
             self.assertEqual(response.status_code, 302)
 
     # test posting dates (
-    @pytest.mark.xfail(reason="works on local, but not on Github workflow \
-        due to SQLite")
     def test_view_summary_previous_date(self):
         self.client.force_login(self.admin_user)
         start_date = timezone.now() - datetime.timedelta(days=31)
@@ -54,8 +49,6 @@ class VisualisationsTest(OppiaTestCase):
         self.assertTemplateUsed(response, self.viz_summary_template)
         self.assertEqual(response.status_code, 200)
 
-    @pytest.mark.xfail(reason="works on local, but not on Github workflow \
-        due to SQLite")
     def test_view_summary_future_date(self):
         self.client.force_login(self.admin_user)
         start_date = timezone.now() + datetime.timedelta(days=31)
@@ -64,8 +57,6 @@ class VisualisationsTest(OppiaTestCase):
         self.assertTemplateUsed(response, self.viz_summary_template)
         self.assertEqual(response.status_code, 200)
 
-    @pytest.mark.xfail(reason="works on local, but not on Github workflow \
-        due to SQLite")
     def test_view_summary_invalid_date(self):
         self.client.force_login(self.admin_user)
         start_date = "not a valid date"
@@ -107,8 +98,6 @@ class VisualisationsTest(OppiaTestCase):
             self.assertEqual(response.status_code, 200)
 
     # test summary helper methods
-    @pytest.mark.xfail(reason="works on local, but not on Github workflow \
-        due to SQLite")
     def test_summary_helper_reg(self):
         start_date = timezone.now() - datetime.timedelta(days=365)
         summary = Summary()
@@ -133,8 +122,6 @@ class VisualisationsTest(OppiaTestCase):
         languages = summary.get_languages(start_date)
         self.assertEqual(len(languages), 3)
 
-    @pytest.mark.xfail(reason="works on local, but not on Github workflow \
-        due to SQLite")
     def test_summary_helper_downloads(self):
         start_date = timezone.now() - datetime.timedelta(days=365)
         # Course Downloads
@@ -144,8 +131,6 @@ class VisualisationsTest(OppiaTestCase):
         self.assertEqual(course_downloads.count(), 0)
         self.assertEqual(previous_course_downloads, 0)
 
-    @pytest.mark.xfail(reason="works on local, but not on Github workflow \
-        due to SQLite")
     def test_summary_helper_activity(self):
         start_date = timezone.now() - datetime.timedelta(days=365)
         # Course Activity
@@ -156,8 +141,6 @@ class VisualisationsTest(OppiaTestCase):
         self.assertEqual(previous_course_activity, 0)
         self.assertEqual(len(hot_courses), 0)
 
-    @pytest.mark.xfail(reason="works on local, but not on Github workflow \
-        due to SQLite")
     def test_summary_helper_search(self):
         start_date = timezone.now() - datetime.timedelta(days=365)
         # Searches

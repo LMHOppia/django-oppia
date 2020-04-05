@@ -2,13 +2,13 @@
 import api
 import pytest
 
-from oppia.test import OppiaTestCase
+from oppia.test import OppiaTransactionTestCase
 
 from oppia.models import Course, CoursePublishingLog
 from settings.models import SettingProperties
 
 
-class CoursePublishResourceTest(OppiaTestCase):
+class CoursePublishResourceTest(OppiaTransactionTestCase):
 
     fixtures = ['tests/test_user.json',
                 'tests/test_oppia.json',
@@ -234,7 +234,8 @@ class CoursePublishResourceTest(OppiaTestCase):
 
     # check file size of course
     def test_course_filesize_limit(self):
-        setting = SettingProperties.objects.get(key='MAX_UPLOAD_SIZE')
+        setting, created = SettingProperties.objects \
+            .get_or_create(key='MAX_UPLOAD_SIZE')
         setting.int_value = 1000
         setting.save()
 
