@@ -30,7 +30,6 @@ class RegisterResource(RegisterBaseResource):
         required = ['username',
                     'password',
                     'passwordagain',
-                    #'email', LMH_custom_start
                     'firstname',
                     'lastname']
         check_required_params(bundle, required)
@@ -71,8 +70,10 @@ class RegisterResource(RegisterBaseResource):
                 email = email[0]
             except IndexError:
                 pass
-            bundle.obj = User.objects.create_user(username, email, password)
+            bundle.obj = User.objects.create_user(username=username,
+                                                  password=password)
             bundle.obj.first_name = first_name
+            bundle.obj.email = email
             bundle.obj.last_name = last_name
             bundle.obj.save()
         except IntegrityError:
