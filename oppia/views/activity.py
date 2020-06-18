@@ -14,15 +14,16 @@ from oppia.models import Tracker
 from oppia.permissions import can_view_course_detail
 from oppia.views.utils import generate_graph_data
 from reports.signals import dashboard_accessed
-from summary.models import CourseDailyStats
+from summary.models import CourseDailyStats, UserCourseSummary
 
 
-def recent_activity(request, course_id):
+def course_detail(request, course_id):
 
     course = can_view_course_detail(request, course_id)
 
     dashboard_accessed.send(sender=None, request=request, data=course)
 
+    download_stats = UserCourseSummary.objects.filter(course=course_id).aggregated_stats('total_downloads', single=True)
     start_date = datetime.datetime.now() - datetime.timedelta(days=31)
     end_date = datetime.datetime.now()
     interval = 'days'
@@ -68,11 +69,12 @@ def recent_activity(request, course_id):
         dates = generate_graph_data(monthly_stats, True)
 
     leaderboard = Points.get_leaderboard(10, course)
-    return render(request, 'course/activity.html',
+    return render(request, 'course/detail.html',
                   {'course': course,
                    'monthly': interval == 'months',
                    'form': form,
                    'data': dates,
+                   'download_stats': download_stats,
                    'leaderboard': leaderboard})
 
 

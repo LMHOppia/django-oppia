@@ -33,6 +33,8 @@ class Course(models.Model):
                                    null=True,
                                    default=None)
     shortname = models.CharField(max_length=200)
+    priority = models.IntegerField(default=0)
+
     filename = models.CharField(max_length=200)
     badge_icon = models.FileField(upload_to="badges",
                                   blank=True,
@@ -522,7 +524,7 @@ class Tracker(models.Model):
                 else:
                     for l in titles:
                         return titles[l]
-        except json.JSONDecodeError:
+        except TypeError:
             pass
         return self.activity_title
 
@@ -534,7 +536,7 @@ class Tracker(models.Model):
             else:
                 for l in titles:
                     return titles[l]
-        except json.JSONDecodeError:
+        except TypeError:
             pass
         return self.section_title
 
