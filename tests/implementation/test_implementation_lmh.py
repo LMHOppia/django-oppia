@@ -10,7 +10,6 @@ class ImplementationCoreTest(TestCase):
     def test_settings(self):
         self.assertEqual(settings.OPPIA_ALLOW_SELF_REGISTRATION, True)
         self.assertEqual(settings.OPPIA_SHOW_GRAVATARS, True)
-        self.assertEqual(settings.OPPIA_STAFF_ONLY_UPLOAD, True)
 
     def test_theme(self):
         with open("./static/css/oppia.scss", 'r') as oppia_scss:
