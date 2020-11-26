@@ -16,9 +16,11 @@ class MediaEmbedCodeTest(OppiaTestCase):
         object='{\"filename\":\"sample_video.m4v\", \
         \"download_url\":\"https://download.digital-campus.org/\", \
         \"digest\":\"45ad219ead30b9a1818176598f8bbbf9\", \
-        \"filesize\":496995, \
+        \"filesize\":0, \
         \"length\":82}']]IMAGE/TEXT HERE[[/media]]"
 
+    maxDiff = None
+    
     def test_media_embed_code(self):
         uploaded_media = UploadedMedia.objects.get(pk=1)
         embed_code = uploaded_media. \
