@@ -1,5 +1,5 @@
 import warnings
 
-VERSION = (0, 12, 18, 'lb', '1', 'rc')
+VERSION = (0, 12, 19, 'lb', '1', 'rc')
 DEFAULT_IP_ADDRESS = None
 warnings.simplefilter('default')
