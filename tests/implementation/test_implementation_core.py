@@ -1,5 +1,6 @@
 import pytest
 import unittest
+import os
 
 from django.conf import settings
 from oppia.test import OppiaTestCase
@@ -14,7 +15,8 @@ class ImplementationCoreTest(OppiaTestCase):
     @pytest.mark.xfail(reason="This is for core Oppia not this LMH implementation")
     @unittest.expectedFailure
     def test_theme(self):
-        with open("./static/css/oppia.scss", 'r') as oppia_scss:
+        scss_path = os.path.join(settings.BASE_DIR, 'static', 'css', 'oppia.scss')
+        with open(scss_path, 'r') as oppia_scss:
             css_file = oppia_scss.read().replace("\n", "")
 
         self.assertNotEqual(css_file.find('$oppia-lighter: #c1e552;'), -1)
